@@ -4,7 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
@@ -94,5 +96,21 @@ public class DatabaseConnection {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public ResultSet runQuery(String query) {
+		Connection con;
+		Statement stat;
+		
+		try {
+			con = ds.getConnection();
+			stat = con.createStatement();
+			return stat.executeQuery(query);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }
