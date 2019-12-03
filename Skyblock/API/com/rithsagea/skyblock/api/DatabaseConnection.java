@@ -10,8 +10,8 @@ import java.sql.Statement;
 import java.util.List;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
+import com.rithsagea.skyblock.Downloader;
 import com.rithsagea.skyblock.api.data.Auction;
-import com.rithsagea.skyblock.downloader.Downloader;
 
 
 public class DatabaseConnection {

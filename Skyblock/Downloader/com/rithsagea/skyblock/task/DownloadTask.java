@@ -2,10 +2,10 @@ package com.rithsagea.skyblock.task;
 
 import java.util.List;
 
+import com.rithsagea.skyblock.Downloader;
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.Logger;
 import com.rithsagea.skyblock.api.data.Auction;
-import com.rithsagea.skyblock.downloader.Downloader;
 
 public class DownloadTask extends BaseTask {
 	

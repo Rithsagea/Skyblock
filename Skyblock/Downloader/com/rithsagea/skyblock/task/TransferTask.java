@@ -1,8 +1,8 @@
 package com.rithsagea.skyblock.task;
 
+import com.rithsagea.skyblock.Downloader;
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.Logger;
-import com.rithsagea.skyblock.downloader.Downloader;
 
 public class TransferTask extends BaseTask {
 

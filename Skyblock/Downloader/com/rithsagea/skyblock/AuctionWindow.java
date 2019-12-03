@@ -1,4 +1,4 @@
-package com.rithsagea.skyblock.downloader;
+package com.rithsagea.skyblock;
 
 import java.util.Timer;
 import java.util.TimerTask;

@@ -1,4 +1,4 @@
-package com.rithsagea.skyblock.api.data;
+package com.rithsagea.skyblock.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.github.mryurihi.tbnbt.stream.NBTInputStream;
 import com.github.mryurihi.tbnbt.tag.NBTTagCompound;
+import com.rithsagea.skyblock.api.data.ItemData;
 
 public class NBTUtil {
 	

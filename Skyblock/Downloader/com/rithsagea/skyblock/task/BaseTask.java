@@ -2,8 +2,8 @@ package com.rithsagea.skyblock.task;
 
 import java.util.TimerTask;
 
+import com.rithsagea.skyblock.Downloader;
 import com.rithsagea.skyblock.api.DatabaseConnection;
-import com.rithsagea.skyblock.downloader.Downloader;
 
 public abstract class BaseTask extends TimerTask {
 	

@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 import java.util.Map;
 import java.util.UUID;
 
+import com.rithsagea.skyblock.util.NBTUtil;
+
 public class Auction {
 	
 	public UUID			id;

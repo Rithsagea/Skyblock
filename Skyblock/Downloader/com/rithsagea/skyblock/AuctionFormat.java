@@ -1,4 +1,4 @@
-package com.rithsagea.skyblock.downloader;
+package com.rithsagea.skyblock;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import com.rithsagea.skyblock.api.data.Auction;
 import com.rithsagea.skyblock.api.data.ItemData;
-import com.rithsagea.skyblock.api.data.NBTUtil;
+import com.rithsagea.skyblock.util.NBTUtil;
 
 public class AuctionFormat {
 	public String uuid;
