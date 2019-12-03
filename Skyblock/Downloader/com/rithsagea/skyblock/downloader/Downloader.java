@@ -16,11 +16,10 @@ import net.hypixel.api.reply.skyblock.SkyBlockAuctionsReply;
 
 public class Downloader {
 	
-	public final HypixelAPI API;
-	public static final ArrayList<Auction> auctions = new ArrayList<Auction>();
-	public static final Gson gson = new Gson();
+	private final HypixelAPI API;
+	private final Gson gson = new Gson();
 	
-	public static long endingTime = 2 * 60 * 1000;
+	private long endingTime = 2 * 60 * 1000;
 	public static Timestamp latestTime;
 	
 	public Downloader(UUID apiKey) {

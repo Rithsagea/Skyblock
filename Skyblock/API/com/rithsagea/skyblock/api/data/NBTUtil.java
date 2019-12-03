@@ -13,7 +13,7 @@ import com.github.mryurihi.tbnbt.tag.NBTTagCompound;
 
 public class NBTUtil {
 	
-	protected static Decoder decoder = Base64.getDecoder();
+	private static Decoder decoder = Base64.getDecoder();
 	
 	public static ItemData getData(String item_bytes) {
 		byte[] data = decoder.decode(item_bytes);
@@ -107,6 +107,7 @@ public class NBTUtil {
 		
 		return enchantMap;
 	}
+	
 	/**
 	 * Converts a map of enchants to an encoded string
 	 * 

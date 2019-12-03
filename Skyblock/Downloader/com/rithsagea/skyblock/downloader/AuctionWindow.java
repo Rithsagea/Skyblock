@@ -16,12 +16,12 @@ import com.rithsagea.skyblock.api.data.Auction;
 
 public class AuctionWindow {
 	
-	public static final Downloader downloader = new Downloader(UUID.fromString(SecureConstants.key));
-	public static final DatabaseConnection db = new DatabaseConnection();
-	public static final Timer timer = new Timer();
+	private static final Downloader downloader = new Downloader(UUID.fromString(SecureConstants.key));
+	private static final DatabaseConnection db = new DatabaseConnection();
+	private static final Timer timer = new Timer();
 	
-	public static final LogQueue log = new LogQueue();
-	public static final JTextArea logInfo = new JTextArea(1, 1);
+	private static final LogQueue log = new LogQueue();
+	private static final JTextArea logInfo = new JTextArea(1, 1);
 	
 	public static void main(String[] args) {
 		Logger.addListener(log);

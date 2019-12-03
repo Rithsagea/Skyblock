@@ -25,7 +25,7 @@ public class AuctionFormat {
 		BigInteger leastSig = new BigInteger(uuid.substring(16, 32), 16);
 		auction.id = new UUID(mostSig.longValue(), leastSig.longValue());
 		
-		//amount - (nbt damn you)
+		//item bytes
 		ItemData data = NBTUtil.getData(item_bytes);
 		auction.item_type = data.itemType;
 		auction.modifier = data.modifier;
@@ -33,6 +33,7 @@ public class AuctionFormat {
 		
 		auction.enchants = NBTUtil.enchantsToString(data.enchants);
 		
+		//normal information
 		auction.start_time = new Timestamp(start);
 		auction.end_time = new Timestamp(end);
 		auction.price = highest_bid_amount;
