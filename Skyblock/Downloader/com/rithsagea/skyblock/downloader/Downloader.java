@@ -1,6 +1,5 @@
 package com.rithsagea.skyblock.downloader;
 
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
