@@ -1,4 +1,4 @@
-package com.rithsagea.skyblock.data;
+package com.rithsagea.skyblock.api.datatypes;
 
 import java.sql.Timestamp;
 

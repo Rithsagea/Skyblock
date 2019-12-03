@@ -10,7 +10,7 @@ import java.util.Map;
 
 import com.github.mryurihi.tbnbt.stream.NBTInputStream;
 import com.github.mryurihi.tbnbt.tag.NBTTagCompound;
-import com.rithsagea.skyblock.api.data.ItemData;
+import com.rithsagea.skyblock.api.datatypes.ItemData;
 
 public class NBTUtil {
 	

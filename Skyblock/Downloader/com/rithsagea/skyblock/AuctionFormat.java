@@ -4,8 +4,8 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.UUID;
 
-import com.rithsagea.skyblock.api.data.Auction;
-import com.rithsagea.skyblock.api.data.ItemData;
+import com.rithsagea.skyblock.api.datatypes.Auction;
+import com.rithsagea.skyblock.api.datatypes.ItemData;
 import com.rithsagea.skyblock.util.NBTUtil;
 
 public class AuctionFormat {

@@ -10,7 +10,7 @@ import javax.swing.JTextArea;
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.Logger;
 import com.rithsagea.skyblock.api.SecureConstants;
-import com.rithsagea.skyblock.api.data.DroppingQueue;
+import com.rithsagea.skyblock.api.datatypes.DroppingQueue;
 import com.rithsagea.skyblock.task.DownloadTask;
 import com.rithsagea.skyblock.task.TransferTask;
 

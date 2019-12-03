@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import com.rithsagea.skyblock.api.data.DroppingQueue;
+import com.rithsagea.skyblock.api.datatypes.DroppingQueue;
 
 public class Logger {
 	

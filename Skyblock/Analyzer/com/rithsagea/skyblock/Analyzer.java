@@ -3,7 +3,7 @@ package com.rithsagea.skyblock;
 import java.sql.Timestamp;
 import java.util.List;
 
-import com.rithsagea.skyblock.data.Datapoint;
+import com.rithsagea.skyblock.api.datatypes.Datapoint;
 
 public class Analyzer {
 	

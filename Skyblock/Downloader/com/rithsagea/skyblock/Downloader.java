@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutionException;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.rithsagea.skyblock.api.data.Auction;
+import com.rithsagea.skyblock.api.datatypes.Auction;
 
 import net.hypixel.api.HypixelAPI;
 import net.hypixel.api.reply.skyblock.SkyBlockAuctionsReply;

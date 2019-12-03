@@ -11,7 +11,7 @@ import java.util.List;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 import com.rithsagea.skyblock.Downloader;
-import com.rithsagea.skyblock.api.data.Auction;
+import com.rithsagea.skyblock.api.datatypes.Auction;
 
 
 public class DatabaseConnection {

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
-import com.rithsagea.skyblock.data.Datapoint;
+import com.rithsagea.skyblock.api.datatypes.Datapoint;
 
 public class AnalyzerWindow {
 	

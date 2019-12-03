@@ -1,4 +1,4 @@
-package com.rithsagea.skyblock.api.data;
+package com.rithsagea.skyblock.api.datatypes;
 
 import java.util.Map;
 
