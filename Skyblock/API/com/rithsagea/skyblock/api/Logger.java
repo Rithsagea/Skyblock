@@ -4,21 +4,23 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import com.rithsagea.skyblock.api.data.DroppingQueue;
+
 public class Logger {
 	
-	private static List<LogQueue> logs = new ArrayList<LogQueue>();
+	private static List<DroppingQueue<String>> logs = new ArrayList<DroppingQueue<String>>();
 	private static final Calendar calendar = Calendar.getInstance();
 	
-	public static void addListener(LogQueue log) {
+	public static void addListener(DroppingQueue<String> log) {
 		logs.add(log);
 	}
 	
 	public static void log(String info) {
 		calendar.setTimeInMillis(System.currentTimeMillis());
-		String line = "[" + calendar.getTime() + "] " + info;
-		for(LogQueue log : logs) {
-			log.addLine(line );
+		String line = "[" + calendar.getTime() + "] " + info + '\n';
+		for(DroppingQueue<String> log : logs) {
+			log.add(line);
 		}
-		System.out.println(line);
+		System.out.print(line);
 	}
 }
