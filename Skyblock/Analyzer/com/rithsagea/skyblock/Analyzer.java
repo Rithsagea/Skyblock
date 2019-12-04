@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
+import com.rithsagea.skyblock.util.MathUtil;
 
 public class Analyzer {
 	
@@ -20,8 +21,12 @@ public class Analyzer {
 	}
 	
 	public void filter(Timestamp start, Timestamp end) {
+		long startTime = start.getTime();
+		long endTime = end.getTime();
 		for(Datapoint point : data) {
-			if(point.time.getTime() > 0);
+			if(!MathUtil.between(point.time.getTime(), startTime, endTime)) {
+				data.remove(point);
+			}
 		}
 	}
 }
