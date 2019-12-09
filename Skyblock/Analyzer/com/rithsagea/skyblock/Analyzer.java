@@ -16,8 +16,9 @@ public class Analyzer {
 	
 	public void printData() {
 		for(Datapoint point : data) {
-			System.out.format("[%s, %f]\n", point.time, point.price);
+			System.out.format("[%s, %f]\n", point.time, point.value);
 		}
+		System.out.format("Items: %d", data.size());
 	}
 	
 	public void filter(Timestamp start, Timestamp end) {
