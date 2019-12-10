@@ -12,13 +12,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Deque;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
@@ -29,6 +27,8 @@ public class AnalyzerWindow {
 	
 	private static final DatabaseConnection db = new DatabaseConnection();
 	private static final Calendar calendar = Calendar.getInstance();
+	
+	private static int outlierCount = 0;
 	
 	public static Datapoint[] resultsToData(ResultSet auctions) throws SQLException {
 		int row_count = 0;
@@ -53,18 +53,10 @@ public class AnalyzerWindow {
 	}
 	
 	public static void printData(Datapoint[] data) {
-		Timestamp time;
-		double price;
-		int amount;
-		
 		int row_count = data.length;
 		
 		for(int x = 0; x < row_count; x++) {
-			time = data[x].time;
-			price = data[x].value;
-			amount = data[x].amount;
-			
-			System.out.format("[%s, %f, %f, %d]\n", time, price / amount, price, amount);
+			System.out.println(data[x]);
 		}
 	}
 	
@@ -109,19 +101,13 @@ public class AnalyzerWindow {
 			int amount = 0;
 			
 			//write data
-			//TODO remove outliers
 			if(!currentData.isEmpty()) {
-				List<Datapoint> a = new ArrayList<Datapoint>();
-				Iterator<Datapoint> iterator = currentData.iterator();
-				while(iterator.hasNext()) {
-					a.add(iterator.next());
-					//remove outliers here
-					Datapoint point = iterator.next();
+				List<Datapoint> elements = new ArrayList<Datapoint>(currentData);
+				removeOutliers(elements, 2);
+				for(Datapoint point : elements) {
 					price += point.value;
 					amount += point.amount;
 				}
-				
-				//calculate stuff here
 			}
 			
 			storedData.add(new Datapoint(time, price, amount));
@@ -130,10 +116,12 @@ public class AnalyzerWindow {
 		} while(currentTime.before(end));
 		
 		Datapoint[] array = new Datapoint[storedData.size()];
+		Logger.log("There were " + outlierCount + " outliers found.");
+		Logger.log("Final array has a total number of " + storedData.size() + " elements");
 		return storedData.toArray(array);
 	}
 	
-	public static Datapoint[] processData(Datapoint[] data) {
+	public static Datapoint[] processData(Datapoint[] data, long interval, long window, TimeUnit unit) {
 		Timestamp start = data[0].time;
 		Timestamp end = data[data.length - 1].time;
 		
@@ -142,37 +130,45 @@ public class AnalyzerWindow {
 		
 		end.setTime(end.getTime() + TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
 		
-		long interval = 5;
-		long window = 30;
-		TimeUnit unit = TimeUnit.MINUTES;
-		
 		return rollingAverage(data, start, end, interval, window, unit);
 	}
 	
-	public static Datapoint[] removeOutliers(Datapoint[] data, double z_limit) {
-		List<Datapoint> withoutOutliers = new ArrayList<Datapoint>();
+	public static void removeOutliers(List<Datapoint> data, double z_limit) {
 		//calculate mean
-		double[] values = new double[data.length];
-		for(int x = 0; x < data.length; x++) {
-			values[x] = data[x].value / data[x].amount;
+		List<Double> values = new ArrayList<Double>();
+		for(Datapoint point : data) {
+			values.add(point.unit_price);
+		}
+		double[] value_array = values.stream().mapToDouble(Double::doubleValue).toArray();
+		
+		double mean = StatUtils.mean(value_array);
+		double variance = StatUtils.populationVariance(value_array, mean);
+		double stdDeviation = Math.sqrt(variance);
+		
+		List<Datapoint> outliers = new ArrayList<Datapoint>();
+		
+		//get outliers
+		for(Datapoint point : data) {
+			double stdscore = (point.unit_price - mean) / stdDeviation;
+			
+			if(stdscore > z_limit) {
+				outliers.add(point);
+				outlierCount++;
+			}
 		}
 		
-		double mean = StatUtils.mean(values);
-		double variance = StatUtils.populationVariance(values, mean);
-		double sd = Math.sqrt(variance);
-		NormalDistribution nd = new NormalDistribution();
-		
-		for(int x = 0; x < values.length; x++) {
-			double stdscore = (values[x] - mean) / sd;
-			double sf = 1.0 - nd.cumulativeProbability(Math.abs(stdscore));
-			Logger.log("" + stdscore + " " + sf);
+		//remove outliers
+		for(Datapoint point : outliers) {
+			data.remove(point);
 		}
-		
-		Datapoint[] r = new Datapoint[withoutOutliers.size()];
-		return withoutOutliers.toArray(r);
 	}
 	
 	public static void main(String[] args) throws SQLException, IOException {
+		
+		long interval = 5;
+		long window = 60;
+		TimeUnit unit = TimeUnit.MINUTES;
+		
 		//Get Data
 		String itemType = "WISE_FRAGMENT";
 		
@@ -180,16 +176,17 @@ public class AnalyzerWindow {
 		Datapoint[] data = resultsToData(auctions);
 		
 		//Process Data
-		Datapoint[] pd = processData(data);
+		Datapoint[] pd = processData(data, interval, window, unit);
 		
 		//Write Rolling Average to CSV
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get("./" + itemType + ".csv"));
 		CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT
-				.withHeader("timestamp", "total", "amount"));
+				.withHeader("timestamp", "unit_price"));
 		
 		for(int x = 0; x < pd.length; x++) {
-			printer.printRecord(pd[x].time, pd[x].value, pd[x].amount);
+			printer.printRecord(pd[x].time, pd[x].unit_price);
 		}
+		
 		printer.flush();
 		printer.close();
 	}
