@@ -126,7 +126,20 @@ public class DataUtil {
 	}
 	
 	//TODO implement
-	public static Datapoint[] expSmooth(Datapoint[] data) {
+	public static Datapoint[] expSmooth(Datapoint[] data, double alpha) {
+		Datapoint[] newData = new Datapoint[data.length];
+		double additive = 1;
+		double currVal = 0;
+		
+		for(int x = 0; x < data.length; x++) {
+			currVal = 0;
+			
+			while(additive > 0) {
+				
+			}
+		}
+		
+		
 		return null;
 	}
 }

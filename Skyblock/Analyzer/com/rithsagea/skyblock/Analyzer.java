@@ -99,7 +99,7 @@ public class Analyzer {
 			break;
 		case EXP_SIMP:
 			processData(AnalyzeType.MAW);
-			pd = DataUtil.expSmooth(pd);
+			pd = DataUtil.expSmooth(pd, 0.8);
 		}
 		
 		cleanData();
