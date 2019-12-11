@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
@@ -96,6 +97,17 @@ public class DatabaseConnection {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public List<String> getItemTypes() throws SQLException {
+		ResultSet set = runQuery("select distinct item_type from skyblock.auction_data");
+		List<String> itemTypes = new ArrayList<String>();
+		
+		while(set.next()) {
+			itemTypes.add(set.getString(1));
+		}
+		
+		return itemTypes;
 	}
 
 	public ResultSet runQuery(String query) {

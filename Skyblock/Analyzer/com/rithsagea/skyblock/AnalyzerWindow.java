@@ -47,7 +47,7 @@ public class AnalyzerWindow {
 		List<Analyzer> analyzers = new ArrayList<Analyzer>();
 		
 		ItemType[] items = new ItemType[] {  
-			ItemType.STRONG_FRAGMENT
+			ItemType.SUMMONING_EYE
 		};
 		
 		//Get Data
@@ -66,6 +66,12 @@ public class AnalyzerWindow {
 		
 		ma.updatePlot(maData);
 		Logger.log("Analysis finished");
+		
+		List<String> itemTypes = db.getItemTypes();
+		for(String str : itemTypes) {
+			System.out.println(str);
+		}
+		
 		Thread.currentThread().join();
 	}
 }
