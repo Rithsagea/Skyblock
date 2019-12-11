@@ -72,11 +72,13 @@ public class Analyzer {
 		this.window = window;
 		this.unit = unit;
 	}
+	
 	public void updateData() throws SQLException {
 		data = resultsToData(db.runQuery("select end_time, price, amount from skyblock.auction_data where item_type = \"" + itemType + "\" order by end_time asc"));
 //		processData(AnalyzeType.MA);
 //		cleanData();
 	}
+	
 	public void processData(AnalyzeType type) {
 		Timestamp start = data[0].time;
 		Timestamp end = data[data.length - 1].time;
@@ -95,18 +97,28 @@ public class Analyzer {
 		case MAW:
 			pd = DataUtil.movingAverage(data, start, end, 1.5, window, interval, unit);
 			break;
+		case EXP_SIMP:
+			processData(AnalyzeType.MAW);
+			pd = DataUtil.expSmooth(pd);
 		}
 		
 		cleanData();
 	}
+	
 	public void cleanData() {
+		Datapoint lastPoint = new Datapoint(new Timestamp(0), 0, 0);
+		lastPoint.unit_price = 0;
 		for(int x = 0; x < pd.length; x++) {
-			if(Double.isNaN(pd[x].value))
-				pd[x].value = 0;
-			if(Double.isNaN(pd[x].unit_price))
-				pd[x].unit_price = 0;
+			if(Double.isNaN(pd[x].value) || pd[x].value <= 0) {
+				pd[x].value = lastPoint.value;
+				pd[x].amount = lastPoint.amount;
+				pd[x].unit_price = lastPoint.unit_price;
+			} else {
+				lastPoint = pd[x];
+			}
 		}
 	}
+	
 	public void writeToCSV() throws IOException {
 
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get("processed_data/" + itemType + ".csv"));
@@ -120,6 +132,7 @@ public class Analyzer {
 		printer.flush();
 		printer.close();
 	}
+	
 	public TimeSeriesTrace<Object> getTSTrace(AnalyzeType type) {
 		processData(type);
 		Object[] values = new Object[pd.length];

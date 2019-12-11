@@ -2,5 +2,6 @@ package com.rithsagea.skyblock.api.datatypes;
 
 public enum AnalyzeType {
 	MA,
-	MAW
+	MAW,
+	EXP_SIMP
 }
