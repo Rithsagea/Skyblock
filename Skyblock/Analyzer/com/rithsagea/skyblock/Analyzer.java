@@ -14,6 +14,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.charts.dataviewer.api.trace.TimeSeriesTrace;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
+import com.rithsagea.skyblock.api.datatypes.AnalyzeType;
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
 import com.rithsagea.skyblock.api.datatypes.ItemType;
 import com.rithsagea.skyblock.util.DataUtil;
@@ -53,15 +54,19 @@ public class Analyzer {
 	private TimeUnit unit;
 	
 	public Analyzer(ItemType itemType) throws SQLException {
+		this(itemType, 1, 1, TimeUnit.HOURS);
+	}
+	
+	public Analyzer(ItemType itemType, long interval, long window, TimeUnit unit) throws SQLException {
 		this.itemType = itemType;
-		
-		interval = 5;
-		window = 60;
-		unit = TimeUnit.MINUTES;
+		this.interval = interval;
+		this.window = window;
+		this.unit = unit;
 		
 		updateData();
 	}
 	
+	//Basic stuff
 	public void setRollingSettings(long interval, long window, TimeUnit unit) {
 		this.interval = interval;
 		this.window = window;
@@ -69,10 +74,10 @@ public class Analyzer {
 	}
 	public void updateData() throws SQLException {
 		data = resultsToData(db.runQuery("select end_time, price, amount from skyblock.auction_data where item_type = \"" + itemType + "\" order by end_time asc"));
-		processData();
-		cleanData();
+//		processData(AnalyzeType.MA);
+//		cleanData();
 	}
-	public void processData() {
+	public void processData(AnalyzeType type) {
 		Timestamp start = data[0].time;
 		Timestamp end = data[data.length - 1].time;
 		
@@ -82,7 +87,17 @@ public class Analyzer {
 		end.setTime(end.getTime() + TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
 		
 		pd = null;
-		pd = DataUtil.rollingAverage(data, start, end, 1.5, window, interval, unit);
+		
+		switch(type) {
+		case MA:
+			pd = DataUtil.movingAverage(data, start, end, interval, unit);
+			break;
+		case MAW:
+			pd = DataUtil.movingAverage(data, start, end, 1.5, window, interval, unit);
+			break;
+		}
+		
+		cleanData();
 	}
 	public void cleanData() {
 		for(int x = 0; x < pd.length; x++) {
@@ -105,7 +120,8 @@ public class Analyzer {
 		printer.flush();
 		printer.close();
 	}
-	public TimeSeriesTrace<Object> getTSTrace() {
+	public TimeSeriesTrace<Object> getTSTrace(AnalyzeType type) {
+		processData(type);
 		Object[] values = new Object[pd.length];
 		Timestamp[] times = new Timestamp[pd.length];
 		for(int x = 0; x < pd.length; x++) {
@@ -114,11 +130,14 @@ public class Analyzer {
 		}
 		
 		TimeSeriesTrace<Object> ts = new TimeSeriesTrace<>();
-		ts.setTraceName(itemType.toString());
+		ts.setTraceName(type.toString() + "_" + itemType.toString());
 		
 		ts.setxArray(times);
 		ts.setyArray(values);
 		
 		return ts;
 	}
+	
+	//Holt Winters
+	
 }

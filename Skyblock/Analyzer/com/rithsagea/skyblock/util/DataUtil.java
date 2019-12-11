@@ -46,15 +46,40 @@ public class DataUtil {
 		
 		return outlierCount;
 	}
-
-	public static Datapoint[] rollingAverage(Datapoint[] data, Timestamp start, Timestamp end, double z_limit, long interval, long window, TimeUnit unit) {
+	
+	public static Datapoint[] movingAverage(Datapoint[] data, Timestamp start, Timestamp end, long interval, TimeUnit unit) {
+		Timestamp currentTime = new Timestamp(start.getTime());
+		Deque<Datapoint> dataIn = new ArrayDeque<Datapoint>(Arrays.asList(data));
+		List<Datapoint> ma = new ArrayList<Datapoint>();
+		
+		long dataInterval = TimeUnit.MILLISECONDS.convert(interval, unit);
+		
+		double totalPrice = 0;
+		int totalAmount = 0;
+		
+		do {
+			while((!dataIn.isEmpty()) && 
+					dataIn.peekFirst().time.getTime() < currentTime.getTime()) {
+				Datapoint point = dataIn.poll();
+				totalPrice += point.value;
+				totalAmount += point.amount;
+			}
+			
+			ma.add(new Datapoint(new Timestamp(currentTime.getTime()), totalPrice, totalAmount));
+			currentTime.setTime(currentTime.getTime() + dataInterval);
+		} while(currentTime.before(end));
+		
+		return ma.toArray(new Datapoint[ma.size()]);
+	}
+	
+	public static Datapoint[] movingAverage(Datapoint[] data, Timestamp start, Timestamp end, double z_limit, long interval, long window, TimeUnit unit) {
 		Logger.log("Getting the rolling average of " + data.length + " datapoints.");
 		
 		int outlierCount = 0;
 		
 		List<Datapoint> list = Arrays.asList(data);
-		Deque<Datapoint> countingData = new ArrayDeque<Datapoint>(list);
-		Deque<Datapoint> currentData = new ArrayDeque<Datapoint>();
+		Deque<Datapoint> dataIn = new ArrayDeque<Datapoint>(list);
+		Deque<Datapoint> dataActive = new ArrayDeque<Datapoint>();
 		List<Datapoint> storedData = new ArrayList<Datapoint>();
 		
 		Timestamp currentTime = new Timestamp(start.getTime());
@@ -64,15 +89,15 @@ public class DataUtil {
 		
 		do {
 			//get rid of old values
-			while((!currentData.isEmpty()) && 
-					currentData.peekLast().time.getTime() < currentTime.getTime() - dataWindow) {
-				currentData.removeLast();
+			while((!dataActive.isEmpty()) && 
+					dataActive.peekLast().time.getTime() < currentTime.getTime() - dataWindow) {
+				dataActive.removeLast();
 			}
 			
 			//read new values
-			while((!countingData.isEmpty()) && 
-					countingData.peekFirst().time.getTime() + dataWindow < currentTime.getTime()) {
-				currentData.add(countingData.poll());
+			while((!dataIn.isEmpty()) && 
+					dataIn.peekFirst().time.getTime() + dataWindow < currentTime.getTime()) {
+				dataActive.add(dataIn.poll());
 			}
 			
 			Timestamp time = new Timestamp(currentTime.getTime());
@@ -80,8 +105,8 @@ public class DataUtil {
 			int amount = 0;
 			
 			//write data
-			if(!currentData.isEmpty()) {
-				List<Datapoint> elements = new ArrayList<Datapoint>(currentData);
+			if(!dataActive.isEmpty()) {
+				List<Datapoint> elements = new ArrayList<Datapoint>(dataActive);
 				outlierCount += removeOutliers(elements, z_limit);
 				for(Datapoint point : elements) {
 					price += point.value;

@@ -10,6 +10,8 @@ import org.charts.dataviewer.api.config.DataViewerConfiguration;
 import org.charts.dataviewer.api.data.PlotData;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
+import com.rithsagea.skyblock.api.Logger;
+import com.rithsagea.skyblock.api.datatypes.AnalyzeType;
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
 import com.rithsagea.skyblock.api.datatypes.ItemType;
 
@@ -17,7 +19,7 @@ public class AnalyzerWindow {
 	
 	private static final DatabaseConnection db = new DatabaseConnection();
 	
-	private static final DataViewer ma = new DataViewer("ma");
+	private static final DataViewer ma = new DataViewer("analyzer");
 	private static final PlotData maData = new PlotData();
 	
 	public static void printData(Datapoint[] data) {
@@ -44,8 +46,12 @@ public class AnalyzerWindow {
 		Analyzer.db = db;
 		List<Analyzer> analyzers = new ArrayList<Analyzer>();
 		
+		ItemType[] items = new ItemType[] {  
+			ItemType.STRONG_FRAGMENT
+		};
+		
 		//Get Data
-		for(ItemType type : ItemType.values()) {
+		for(ItemType type : items) {
 			analyzers.add(new Analyzer(type));
 		}
 		
@@ -53,12 +59,13 @@ public class AnalyzerWindow {
 		initDataviewer();
 		
 		for(Analyzer analyzer : analyzers) {
-			analyzer.writeToCSV();
-			maData.addTrace(analyzer.getTSTrace());
+//			analyzer.writeToCSV();
+			maData.addTrace(analyzer.getTSTrace(AnalyzeType.MA));
+			maData.addTrace(analyzer.getTSTrace(AnalyzeType.MAW));
 		}
 		
 		ma.updatePlot(maData);
-		
+		Logger.log("Analysis finished");
 		Thread.currentThread().join();
 	}
 }
