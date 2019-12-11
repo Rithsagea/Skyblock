@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.charts.dataviewer.api.trace.TimeSeriesTrace;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
@@ -41,7 +42,7 @@ public class Analyzer {
 		return data;
 	}
 	
-	private final DatabaseConnection db;
+	public static DatabaseConnection db;
 	private final ItemType itemType;
 	
 	private Datapoint[] data;
@@ -51,9 +52,8 @@ public class Analyzer {
 	private long window;
 	private TimeUnit unit;
 	
-	public Analyzer(ItemType itemType, DatabaseConnection db) throws SQLException {
+	public Analyzer(ItemType itemType) throws SQLException {
 		this.itemType = itemType;
-		this.db = db;
 		
 		interval = 5;
 		window = 60;
@@ -70,6 +70,7 @@ public class Analyzer {
 	public void updateData() throws SQLException {
 		data = resultsToData(db.runQuery("select end_time, price, amount from skyblock.auction_data where item_type = \"" + itemType + "\" order by end_time asc"));
 		processData();
+		cleanData();
 	}
 	public void processData() {
 		Timestamp start = data[0].time;
@@ -83,9 +84,17 @@ public class Analyzer {
 		pd = null;
 		pd = DataUtil.rollingAverage(data, start, end, 1.5, window, interval, unit);
 	}
-	public void writeToCSV(String path) throws IOException {
+	public void cleanData() {
+		for(int x = 0; x < pd.length; x++) {
+			if(Double.isNaN(pd[x].value))
+				pd[x].value = 0;
+			if(Double.isNaN(pd[x].unit_price))
+				pd[x].unit_price = 0;
+		}
+	}
+	public void writeToCSV() throws IOException {
 
-		BufferedWriter writer = Files.newBufferedWriter(Paths.get(path));
+		BufferedWriter writer = Files.newBufferedWriter(Paths.get("processed_data/" + itemType + ".csv"));
 		CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT
 				.withHeader("timestamp", "unit_price"));
 		
@@ -96,11 +105,20 @@ public class Analyzer {
 		printer.flush();
 		printer.close();
 	}
-	public double[] getProcessedValues() {
-		double[] values = new double[pd.length];
+	public TimeSeriesTrace<Object> getTSTrace() {
+		Object[] values = new Object[pd.length];
+		Timestamp[] times = new Timestamp[pd.length];
 		for(int x = 0; x < pd.length; x++) {
 			values[x] = pd[x].unit_price;
+			times[x] = pd[x].time;
 		}
-		return values;
+		
+		TimeSeriesTrace<Object> ts = new TimeSeriesTrace<>();
+		ts.setTraceName(itemType.toString());
+		
+		ts.setxArray(times);
+		ts.setyArray(values);
+		
+		return ts;
 	}
 }

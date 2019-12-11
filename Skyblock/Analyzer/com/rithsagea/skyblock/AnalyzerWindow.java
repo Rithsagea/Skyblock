@@ -2,6 +2,12 @@ package com.rithsagea.skyblock;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.charts.dataviewer.DataViewer;
+import org.charts.dataviewer.api.config.DataViewerConfiguration;
+import org.charts.dataviewer.api.data.PlotData;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
@@ -11,6 +17,9 @@ public class AnalyzerWindow {
 	
 	private static final DatabaseConnection db = new DatabaseConnection();
 	
+	private static final DataViewer ma = new DataViewer("ma");
+	private static final PlotData maData = new PlotData();
+	
 	public static void printData(Datapoint[] data) {
 		int row_count = data.length;
 		
@@ -19,18 +28,37 @@ public class AnalyzerWindow {
 		}
 	}
 	
-	public static void main(String[] args) throws SQLException, IOException {
+	public static void initDataviewer() {
+		DataViewerConfiguration config = new DataViewerConfiguration();
+		config.setPlotTitle("Moving Averages");
+		config.setxAxisTitle("Time");
+		config.setyAxisTitle("Unit Price");
+		config.setMarginBottom(250);
+		config.showLegend(true);
+		config.setLegendInsidePlot(false);
+		ma.updateConfiguration(config);
+	}
+	
+	public static void main(String[] args) throws SQLException, IOException, InterruptedException {
 		
-		ItemType type = ItemType.WISE_FRAGMENT;
+		Analyzer.db = db;
+		List<Analyzer> analyzers = new ArrayList<Analyzer>();
 		
 		//Get Data
-		Analyzer analyzer = new Analyzer(type, db);
-		analyzer.writeToCSV("" + type + ".csv");
-		
-		double values[] = analyzer.getProcessedValues();
-		double index[] = new double[values.length];
-		for(int x = 0; x < index.length; index[x] = x, values[x] = Double.isNaN(values[x]) ? 0 : values[x], x++);
+		for(ItemType type : ItemType.values()) {
+			analyzers.add(new Analyzer(type));
+		}
 		
 		//Graph Rolling Average
+		initDataviewer();
+		
+		for(Analyzer analyzer : analyzers) {
+			analyzer.writeToCSV();
+			maData.addTrace(analyzer.getTSTrace());
+		}
+		
+		ma.updatePlot(maData);
+		
+		Thread.currentThread().join();
 	}
 }
