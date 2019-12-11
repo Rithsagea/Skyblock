@@ -3,6 +3,7 @@ package com.rithsagea.skyblock;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.charts.dataviewer.DataViewer;
@@ -13,6 +14,7 @@ import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.Logger;
 import com.rithsagea.skyblock.api.datatypes.AnalyzeType;
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
+import com.rithsagea.skyblock.api.datatypes.DragonEquipment;
 import com.rithsagea.skyblock.api.datatypes.ItemType;
 
 public class AnalyzerWindow {
@@ -47,7 +49,10 @@ public class AnalyzerWindow {
 		List<Analyzer> analyzers = new ArrayList<Analyzer>();
 		
 		ItemType[] items = new ItemType[] {  
-			ItemType.SUMMONING_EYE
+			DragonEquipment.YOUNG_DRAGON_HELMET,
+			DragonEquipment.YOUNG_DRAGON_CHESTPLATE,
+			DragonEquipment.YOUNG_DRAGON_LEGGINGS,
+			DragonEquipment.YOUNG_DRAGON_BOOTS
 		};
 		
 		//Get Data
@@ -60,17 +65,20 @@ public class AnalyzerWindow {
 		
 		for(Analyzer analyzer : analyzers) {
 //			analyzer.writeToCSV();
-			maData.addTrace(analyzer.getTSTrace(AnalyzeType.MA));
+//			maData.addTrace(analyzer.getTSTrace(AnalyzeType.MA));
 			maData.addTrace(analyzer.getTSTrace(AnalyzeType.MAW));
 		}
 		
 		ma.updatePlot(maData);
 		Logger.log("Analysis finished");
+		//URL Here:
+		//http://localhost:8090/view/analyzer
 		
-		List<String> itemTypes = db.getItemTypes();
-		for(String str : itemTypes) {
-			System.out.println(str);
-		}
+//		List<String> itemTypes = db.getItemTypes();
+//		Collections.sort(itemTypes);
+//		for(String str : itemTypes) {
+//			System.out.println(str);
+//		}
 		
 		Thread.currentThread().join();
 	}
