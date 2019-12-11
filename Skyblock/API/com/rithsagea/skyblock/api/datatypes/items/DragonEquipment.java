@@ -1,4 +1,4 @@
-package com.rithsagea.skyblock.api.datatypes;
+package com.rithsagea.skyblock.api.datatypes.items;
 
 public enum DragonEquipment implements ItemType {
 	

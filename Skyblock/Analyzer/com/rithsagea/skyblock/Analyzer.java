@@ -16,7 +16,7 @@ import org.charts.dataviewer.api.trace.TimeSeriesTrace;
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.datatypes.AnalyzeType;
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
-import com.rithsagea.skyblock.api.datatypes.ItemType;
+import com.rithsagea.skyblock.api.datatypes.items.ItemType;
 import com.rithsagea.skyblock.util.DataUtil;
 import com.rithsagea.skyblock.util.TimeUtil;
 

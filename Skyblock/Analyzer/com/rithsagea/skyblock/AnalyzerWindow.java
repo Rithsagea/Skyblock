@@ -14,8 +14,8 @@ import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.Logger;
 import com.rithsagea.skyblock.api.datatypes.AnalyzeType;
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
-import com.rithsagea.skyblock.api.datatypes.DragonEquipment;
-import com.rithsagea.skyblock.api.datatypes.ItemType;
+import com.rithsagea.skyblock.api.datatypes.items.DragonEquipment;
+import com.rithsagea.skyblock.api.datatypes.items.ItemType;
 
 public class AnalyzerWindow {
 	
