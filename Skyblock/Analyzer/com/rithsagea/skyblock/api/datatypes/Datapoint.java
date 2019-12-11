@@ -4,13 +4,18 @@ import java.sql.Timestamp;
 
 public class Datapoint {
 	
-	public Timestamp time = null;
-	public double unit_price = 0;
-	public double value = 0;
-	public int amount = 0;
+	public Timestamp time;
+	public double unit_price;
+	public double value;
+	public int amount;
 	
 	public String toString() {
-		return String.format("[%s, %.0f, %d, %.2f]", time, value, amount, unit_price);
+		return String.format("[%s, %f]", time, unit_price);
+	}
+	
+	public Datapoint(Timestamp time, double unit_price) {
+		this.time = time;
+		this.unit_price = unit_price;
 	}
 	
 	public Datapoint(Timestamp time, double value, int amount) {

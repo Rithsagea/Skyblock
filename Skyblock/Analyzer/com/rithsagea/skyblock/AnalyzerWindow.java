@@ -49,10 +49,11 @@ public class AnalyzerWindow {
 		List<Analyzer> analyzers = new ArrayList<Analyzer>();
 		
 		ItemType[] items = new ItemType[] {  
-			DragonEquipment.YOUNG_DRAGON_HELMET,
-			DragonEquipment.YOUNG_DRAGON_CHESTPLATE,
-			DragonEquipment.YOUNG_DRAGON_LEGGINGS,
-			DragonEquipment.YOUNG_DRAGON_BOOTS
+			DragonEquipment.STRONG_FRAGMENT
+//			DragonEquipment.YOUNG_DRAGON_HELMET,
+//			DragonEquipment.YOUNG_DRAGON_CHESTPLATE,
+//			DragonEquipment.YOUNG_DRAGON_LEGGINGS,
+//			DragonEquipment.YOUNG_DRAGON_BOOTS
 		};
 		
 		//Get Data
@@ -65,8 +66,8 @@ public class AnalyzerWindow {
 		
 		for(Analyzer analyzer : analyzers) {
 //			analyzer.writeToCSV();
-//			maData.addTrace(analyzer.getTSTrace(AnalyzeType.MA));
-			maData.addTrace(analyzer.getTSTrace(AnalyzeType.MAW));
+			maData.addTrace(analyzer.getTSTrace(AnalyzeType.MA));
+			maData.addTrace(analyzer.getTSTrace(AnalyzeType.EXP_SIMP));
 		}
 		
 		ma.updatePlot(maData);
