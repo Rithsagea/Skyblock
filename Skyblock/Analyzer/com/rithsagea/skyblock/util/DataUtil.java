@@ -125,4 +125,8 @@ public class DataUtil {
 		return storedData.toArray(array);
 	}
 	
+	//TODO implement
+	public static Datapoint[] expSmooth(Datapoint[] data) {
+		return null;
+	}
 }
