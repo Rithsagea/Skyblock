@@ -132,7 +132,7 @@ public class DataUtil {
 		double sum = 0;
 		
 		for(int x = 0; x < data.length; x++) {
-			sum = data[x].unit_price + coefficient * sum;
+			sum = alpha * data[x].unit_price + coefficient * sum;
 			newData[x] = new Datapoint(data[x].time, sum);
 		}
 		
