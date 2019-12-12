@@ -11,10 +11,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.charts.dataviewer.api.data.PlotData;
 import org.charts.dataviewer.api.trace.TimeSeriesTrace;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
-import com.rithsagea.skyblock.api.datatypes.AnalyzeType;
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
 import com.rithsagea.skyblock.api.datatypes.items.ItemType;
 import com.rithsagea.skyblock.util.DataUtil;
@@ -42,7 +42,7 @@ public class Analyzer {
 		
 		return data;
 	}
-	
+
 	public static DatabaseConnection db;
 	private final ItemType itemType;
 	
@@ -64,6 +64,7 @@ public class Analyzer {
 		this.unit = unit;
 		
 		updateData();
+		loadMovingAverage();
 	}
 	
 	//Basic stuff
@@ -75,11 +76,9 @@ public class Analyzer {
 	
 	public void updateData() throws SQLException {
 		data = resultsToData(db.runQuery("select end_time, price, amount from skyblock.auction_data where item_type = \"" + itemType + "\" order by end_time asc"));
-//		processData(AnalyzeType.MA);
-//		cleanData();
 	}
 	
-	public void processData(AnalyzeType type) {
+	public void loadMovingAverage() {
 		Timestamp start = data[0].time;
 		Timestamp end = data[data.length - 1].time;
 		
@@ -88,20 +87,7 @@ public class Analyzer {
 		
 		end.setTime(end.getTime() + TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
 		
-		pd = null;
-		
-		switch(type) {
-		case MA:
-			pd = DataUtil.movingAverage(data, start, end, interval, unit);
-			break;
-		case MAW:
-			pd = DataUtil.movingAverage(data, start, end, 1.5, window, interval, unit);
-			break;
-		case EXP_SIMP:
-			processData(AnalyzeType.MAW);
-			pd = DataUtil.expSmooth(pd, 0.8);
-		}
-		
+		pd = DataUtil.movingAverage(data, start, end, 1.5, window, interval, unit);
 		cleanData();
 	}
 	
@@ -109,9 +95,7 @@ public class Analyzer {
 		Datapoint lastPoint = new Datapoint(new Timestamp(0), 0, 0);
 		lastPoint.unit_price = 0;
 		for(int x = 0; x < pd.length; x++) {
-			if(Double.isNaN(pd[x].value) || pd[x].value <= 0) {
-				pd[x].value = lastPoint.value;
-				pd[x].amount = lastPoint.amount;
+			if(Double.isNaN(pd[x].unit_price) || pd[x].unit_price < 0) {
 				pd[x].unit_price = lastPoint.unit_price;
 			} else {
 				lastPoint = pd[x];
@@ -133,22 +117,22 @@ public class Analyzer {
 		printer.close();
 	}
 	
-	public TimeSeriesTrace<Object> getTSTrace(AnalyzeType type) {
-		processData(type);
+	public void appendTrace(PlotData plot) {
 		Object[] values = new Object[pd.length];
-		Timestamp[] times = new Timestamp[pd.length];
+		Timestamp[] time = new Timestamp[pd.length];
+		
 		for(int x = 0; x < pd.length; x++) {
 			values[x] = pd[x].unit_price;
-			times[x] = pd[x].time;
+			time[x] = pd[x].time;
 		}
 		
 		TimeSeriesTrace<Object> ts = new TimeSeriesTrace<>();
-		ts.setTraceName(type.toString() + "_" + itemType.toString());
+		ts.setTraceName("MA_" + itemType.toString());
 		
-		ts.setxArray(times);
+		ts.setxArray(time);
 		ts.setyArray(values);
 		
-		return ts;
+		plot.addTrace(ts);
 	}
 	
 	//Holt Winters

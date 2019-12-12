@@ -24,14 +24,6 @@ public class AnalyzerWindow {
 	private static final DataViewer ma = new DataViewer("analyzer");
 	private static final PlotData maData = new PlotData();
 	
-	public static void printData(Datapoint[] data) {
-		int row_count = data.length;
-		
-		for(int x = 0; x < row_count; x++) {
-			System.out.println(data[x]);
-		}
-	}
-	
 	public static void initDataviewer() {
 		DataViewerConfiguration config = new DataViewerConfiguration();
 		config.setPlotTitle("Moving Averages");
@@ -66,8 +58,7 @@ public class AnalyzerWindow {
 		
 		for(Analyzer analyzer : analyzers) {
 //			analyzer.writeToCSV();
-			maData.addTrace(analyzer.getTSTrace(AnalyzeType.MA));
-			maData.addTrace(analyzer.getTSTrace(AnalyzeType.EXP_SIMP));
+			analyzer.appendTrace(maData);
 		}
 		
 		ma.updatePlot(maData);
