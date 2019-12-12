@@ -132,11 +132,18 @@ public class Analyzer {
 	
 	public void appendTrace(PlotData plot) {
 		loadData();
-		TimeSeriesTrace<Object> ts = new TimeSeriesTrace<>("MA_" + itemType.toString());
-		ts.setxArray(time);
-		ts.setyArray(values);
+		TimeSeriesTrace<Object> ma = new TimeSeriesTrace<>("MA_" + itemType.toString());
+		ma.setxArray(time);
+		ma.setyArray(values);
 		
-		plot.addTrace(ts);
+		pd = DataUtil.expSmooth(data, 0.8);
+		loadData();
+		TimeSeriesTrace<Object> exp = new TimeSeriesTrace<>("EXP_" + itemType.toString());
+		exp.setxArray(time);
+		exp.setyArray(values);
+		
+		plot.addTrace(ma);
+		plot.addTrace(exp);
 	}
 	
 	//Holt Winters
