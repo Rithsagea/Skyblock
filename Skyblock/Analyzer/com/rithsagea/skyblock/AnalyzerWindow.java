@@ -3,7 +3,6 @@ package com.rithsagea.skyblock;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.charts.dataviewer.DataViewer;
@@ -12,8 +11,6 @@ import org.charts.dataviewer.api.data.PlotData;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.Logger;
-import com.rithsagea.skyblock.api.datatypes.AnalyzeType;
-import com.rithsagea.skyblock.api.datatypes.Datapoint;
 import com.rithsagea.skyblock.api.datatypes.items.DragonEquipment;
 import com.rithsagea.skyblock.api.datatypes.items.ItemType;
 

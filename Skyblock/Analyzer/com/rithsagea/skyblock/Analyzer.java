@@ -49,6 +49,9 @@ public class Analyzer {
 	private Datapoint[] data;
 	private Datapoint[] pd;
 	
+	private Object[] values;
+	private Timestamp[] time;
+	
 	private long interval;
 	private long window;
 	private TimeUnit unit;
@@ -117,18 +120,19 @@ public class Analyzer {
 		printer.close();
 	}
 	
-	public void appendTrace(PlotData plot) {
-		Object[] values = new Object[pd.length];
-		Timestamp[] time = new Timestamp[pd.length];
+	public void loadData() {
+		values = new Object[pd.length];
+		time = new Timestamp[pd.length];
 		
 		for(int x = 0; x < pd.length; x++) {
 			values[x] = pd[x].unit_price;
 			time[x] = pd[x].time;
 		}
-		
-		TimeSeriesTrace<Object> ts = new TimeSeriesTrace<>();
-		ts.setTraceName("MA_" + itemType.toString());
-		
+	}
+	
+	public void appendTrace(PlotData plot) {
+		loadData();
+		TimeSeriesTrace<Object> ts = new TimeSeriesTrace<>("MA_" + itemType.toString());
 		ts.setxArray(time);
 		ts.setyArray(values);
 		
