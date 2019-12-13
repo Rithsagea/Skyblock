@@ -157,14 +157,13 @@ public class DataUtil {
 		return newData;
 	}
 	
-	public static double[] trendSmoothing(Datapoint[] data, double alpha, double gamma, boolean debug) {
+	public static double[] trendSmoothing(Datapoint[] data, Datapoint[] smoothedData, double gamma, boolean debug) {
 		if(debug) {
 			Logger.log("-=-=- Trend Smoothing -=-=-");
 			Logger.log("Smoothing " + data.length + " elements.");
 		}
 		
-		
-		Datapoint[] simpExp = expSmooth(data, alpha, false);
+		Datapoint[] simpExp = smoothedData;
 		double[] newData = new double[data.length];
 		double coefficient = 1 - gamma;
 		double sum = 0;
@@ -181,14 +180,14 @@ public class DataUtil {
 		return newData;
 	}
 	
-	public static double[] seasonalSmoothing(Datapoint[] data, double alpha, double beta, int periods, boolean debug) {
+	public static double[] seasonalSmoothing(Datapoint[] data, Datapoint[] smoothedData, double beta, int periods, boolean debug) {
 		if(debug) {
 			Logger.log("-=-=- Seasonal Smoothing -=-=-");
 			Logger.log("Smoothing " + data.length + " elements.");
 		}
 		
 		double[] newData = new double[periods];
-		Datapoint[] simpExp = expSmooth(data, alpha, false);
+		Datapoint[] simpExp = smoothedData;
 		double coefficient = 1 - beta;
 		int currPer = 1;
 		
@@ -203,24 +202,36 @@ public class DataUtil {
 	}
 	
 	//Holt Winters
+	/**
+	 * 
+	 * @param data			moving Average data to analyze
+	 * @param alpha			coefficient for exponential smoothing
+	 * @param beta			coefficient for seasons
+	 * @param gamma			coefficient for trends
+	 * @param interval		distance between data points in milliseconds
+	 * @param periods		periods in a season
+	 * @param seasonsAhead	how many seasons ahead to forecast
+	 * @param debug			whether to print debug data or not
+	 * @return				the generated forecast
+	 */
 	public static Datapoint[] generateForecast(Datapoint[] data, double alpha, double beta, double gamma, long interval, int periods, int seasonsAhead, boolean debug) {
 		if(debug) {
 			Logger.log("-=-=- Forecaster -=-=-");
 			Logger.log("Calculating data for " + data.length + " datapoints.");
 		}
 		Datapoint[] smooth = expSmooth(data, alpha, false);
-		double[] trend = trendSmoothing(data, alpha, gamma, false);
-		double[] season = seasonalSmoothing(data, alpha, beta, periods, false);
+		double[] season = seasonalSmoothing(data, smooth, beta, periods, false);
+		double[] trend = trendSmoothing(data, smooth, gamma, false);
 		
 		if(debug) Logger.log("Generating forecast for the next " + seasonsAhead + " seasons.");
 		Datapoint[] forecast = new Datapoint[data.length];
 		
-		long periodLength = interval * periods;
+		long seasonLength = interval * periods * seasonsAhead;
 		double sum = 0;
 		
 		for(int x = 0; x < data.length; x++) {
 			sum = (smooth[x].unit_price + trend[x]) * season[x % periods];
-			forecast[x] = new Datapoint(new Timestamp(data[x].time.getTime() + periodLength), sum);
+			forecast[x] = new Datapoint(new Timestamp(data[x].time.getTime() + seasonLength), sum);
 		}
 		
 		if(debug) Logger.log("MSE: " + getMSE(data, forecast));
@@ -247,16 +258,30 @@ public class DataUtil {
 		return mse;
 	}
 	
-	public static double acceptProb(double a, double b, double c) {
-		return 0;
+	public static double acceptProb(double current, double neighbor, double temperature) {
+		return (current - neighbor) / temperature;
+		
 	}
 	
-	public static double[] simAnnealing(Datapoint[] ma, long interval, int periods, int seasonsAhead) {
-		double par[] = {0, 0, 0};
+	
+	public static double[] simAnnealing(Datapoint[] ma, int iterations, long interval, int periods, int seasonsAhead) {
+		double accept = 0.3; //margin of error target
 		
-		double accept = 0.3; //margin for error or something
-		double lim = getAverage(ma) * accept * (ma.length); //how small mse has to be or something
+		double[] par = {0, 0, 0};
+		double[] newPar = {0, 0, 0};
+		double lim = Math.pow(getAverage(ma) * accept, 2) * (ma.length - (periods * seasonsAhead));
 		
+		double temperature = 0;
+		
+		Datapoint[] forecast;
+		
+		//run algorithm a lot of times
+		for(int x = 0; x < iterations; x++) {
+			forecast = generateForecast(ma, par[0], par[1], par[2]);
+			
+			if(temperature < lim)
+				break;
+		}
 		
 		return par;
 	}
