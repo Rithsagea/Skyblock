@@ -3,6 +3,7 @@ package com.rithsagea.skyblock;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.charts.dataviewer.DataViewer;
@@ -32,6 +33,14 @@ public class AnalyzerWindow {
 		ma.updateConfiguration(config);
 	}
 	
+	public static void printItems() throws SQLException {
+		List<String> itemTypes = db.getItemTypes();
+		Collections.sort(itemTypes);
+		for(String str : itemTypes) {
+			System.out.println(str);
+		}
+	}
+	
 	public static void main(String[] args) throws SQLException, IOException, InterruptedException {
 		
 		Analyzer.db = db;
@@ -39,10 +48,6 @@ public class AnalyzerWindow {
 		
 		ItemType[] items = new ItemType[] {  
 			DragonEquipment.STRONG_FRAGMENT
-//			DragonEquipment.YOUNG_DRAGON_HELMET,
-//			DragonEquipment.YOUNG_DRAGON_CHESTPLATE,
-//			DragonEquipment.YOUNG_DRAGON_LEGGINGS,
-//			DragonEquipment.YOUNG_DRAGON_BOOTS
 		};
 		
 		//Get Data
@@ -62,12 +67,6 @@ public class AnalyzerWindow {
 		Logger.log("Analysis finished");
 		//URL Here:
 		//http://localhost:8090/view/analyzer
-		
-//		List<String> itemTypes = db.getItemTypes();
-//		Collections.sort(itemTypes);
-//		for(String str : itemTypes) {
-//			System.out.println(str);
-//		}
 		
 		Thread.currentThread().join();
 	}

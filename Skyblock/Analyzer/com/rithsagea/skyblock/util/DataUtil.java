@@ -73,6 +73,7 @@ public class DataUtil {
 	}
 	
 	public static Datapoint[] movingAverage(Datapoint[] data, Timestamp start, Timestamp end, double z_limit, long interval, long window, TimeUnit unit) {
+		Logger.log("-=-=- Moving Average -=-=-");
 		Logger.log("Getting the rolling average of " + data.length + " datapoints.");
 		
 		int outlierCount = 0;
@@ -126,16 +127,49 @@ public class DataUtil {
 	}
 	
 	//TODO implement
-	public static Datapoint[] expSmooth(Datapoint[] data, double alpha) {
+	public static Datapoint[] expSmooth(Datapoint[] data, double alpha, boolean debug) {
+		if(debug) {
+			Logger.log("-=-=- Simple Exponential Smoothing -=-=-");
+			Logger.log("Smoothing " + data.length + " elements.");
+		}
+		
 		Datapoint[] newData = new Datapoint[data.length];
 		double coefficient = 1 - alpha;
 		double sum = 0;
 		
-		for(int x = 0; x < data.length; x++) {
-			sum = alpha * data[x].unit_price + coefficient * sum;
+		newData[0] = data[0];
+		
+		for(int x = 1; x < data.length; x++) {
+			sum = (alpha * data[x - 1].unit_price) + (coefficient * newData[x - 1].unit_price);
 			newData[x] = new Datapoint(data[x].time, sum);
 		}
 		
+		if(debug) Logger.log("Final array has a total number of " + newData.length + " elements");
 		return newData;
 	}
+	
+	public static Datapoint[] doubleExpSmooth(Datapoint[] data, double alpha, double gamma) {
+		Logger.log("-=-=- Double Exponential Smoothing -=-=-");
+		Logger.log("Smoothing " + data.length + " elements.");
+		
+		Datapoint[] newData = new Datapoint[data.length];
+		Datapoint[] simpExp = expSmooth(data, alpha, false);
+		double coefficient = 1 - gamma;
+		double sum = 0;
+		
+		newData[0] = simpExp[0];
+		
+		for(int x = 1; x < data.length; x++) {
+			double a = simpExp[x].unit_price - simpExp[x - 1].unit_price;
+			double b = newData[x - 1].unit_price;
+			sum = gamma * (a) + coefficient * b;
+			
+			newData[x] = new Datapoint(simpExp[x].time, sum);
+		}
+		
+		Logger.log("Final array has a total number of " + newData.length + " elements");
+		return newData;
+	}
+	
+	
 }

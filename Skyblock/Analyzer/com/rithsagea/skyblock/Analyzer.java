@@ -47,6 +47,7 @@ public class Analyzer {
 	private final ItemType itemType;
 	
 	private Datapoint[] data;
+	private Datapoint[] ma;
 	private Datapoint[] pd;
 	
 	private Object[] values;
@@ -92,16 +93,28 @@ public class Analyzer {
 		
 		pd = DataUtil.movingAverage(data, start, end, 1.5, window, interval, unit);
 		cleanData();
+		ma = pd;
+		pd = null;
 	}
 	
 	public void cleanData() {
+		Datapoint firstPoint = null;
 		Datapoint lastPoint = new Datapoint(new Timestamp(0), 0, 0);
 		lastPoint.unit_price = 0;
 		for(int x = 0; x < pd.length; x++) {
 			if(Double.isNaN(pd[x].unit_price) || pd[x].unit_price < 0) {
 				pd[x].unit_price = lastPoint.unit_price;
 			} else {
+				if(firstPoint == null)firstPoint = pd[x];
 				lastPoint = pd[x];
+			}
+		}
+		
+		for(int x = 0; x < pd.length; x++) {
+			if(pd[x].unit_price == 0) {
+				pd[x].unit_price = firstPoint.unit_price;
+			} else {
+				break;
 			}
 		}
 	}
@@ -130,20 +143,29 @@ public class Analyzer {
 		}
 	}
 	
+	public TimeSeriesTrace<Object> createTrace(String name) {
+		loadData();
+		TimeSeriesTrace<Object> trace = new TimeSeriesTrace<>(name);
+		trace.setxArray(time);
+		trace.setyArray(values);
+		
+		return trace;
+	}
+	
 	public void appendTrace(PlotData plot) {
-		loadData();
-		TimeSeriesTrace<Object> ma = new TimeSeriesTrace<>("MA_" + itemType.toString());
-		ma.setxArray(time);
-		ma.setyArray(values);
+		pd = ma;
+		TimeSeriesTrace<Object> ma_trace = createTrace("MA_" + itemType.toString());
 		
-		pd = DataUtil.expSmooth(data, 0.8);
-		loadData();
-		TimeSeriesTrace<Object> exp = new TimeSeriesTrace<>("EXP_" + itemType.toString());
-		exp.setxArray(time);
-		exp.setyArray(values);
+		pd = DataUtil.expSmooth(ma, 0.6, true);
+		TimeSeriesTrace<Object> exp_trace = createTrace("EXP_" + itemType.toString());
 		
-		plot.addTrace(ma);
-		plot.addTrace(exp);
+		pd = DataUtil.doubleExpSmooth(ma, 0.6, 0.9);
+		TimeSeriesTrace<Object> db_exp_trace = createTrace("DB_EXP_" + itemType.toString());
+		
+		plot.addAll(ma_trace,
+					exp_trace,
+					db_exp_trace);
+		
 	}
 	
 	//Holt Winters
