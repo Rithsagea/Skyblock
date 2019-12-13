@@ -308,7 +308,55 @@ public class DataUtil {
 		return par;
 	}
 	
-	//particle swarm
-	
 	//genetics
+	private static class Genome {
+		
+		public double alpha;
+		public double beta;
+		public double gamma;
+		
+		public double fitness;
+		
+		public Genome(Random rand) {
+			alpha = rand.nextDouble();
+			beta = rand.nextDouble();
+			gamma = rand.nextDouble();
+		}
+		
+		public Genome(double alpha, double beta, double gamma) {
+			this.alpha = alpha;
+			this.beta = beta;
+			this.gamma = gamma;
+		}
+		
+		public void calcFitness(Datapoint[] ma, long interval, int periods, int seasonsAhead) {
+			Datapoint[] forecast = generateForecast(ma, alpha, beta, gamma, interval, periods, seasonsAhead, false);
+			fitness = getMSE(ma, forecast);
+		}
+		
+		public double[] toArray() {
+			return new double[] {alpha, beta, gamma};
+		}
+	}
+	
+	public static double[] geneticsOpt(Datapoint[] ma, int generations, int limit, long interval, int periods, int seasonsAhead) {
+		Logger.log("Genetics Optimization");
+		
+		int populationLimit = limit;
+		Random rand = new Random();
+		
+		List<Genome> population = new ArrayList<Genome>();
+		
+		for(int x = 0; x < populationLimit; x++) {
+			Genome genome = new Genome(rand);
+			genome.calcFitness(ma, interval, periods, seasonsAhead);
+			population.add(genome);
+		}
+		
+		for(int x = 0; x < generations; x++) {
+			
+		}
+		
+		return population.get(0).toArray();
+	}
 }
