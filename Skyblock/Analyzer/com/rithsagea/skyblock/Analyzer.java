@@ -147,24 +147,10 @@ public class Analyzer {
 	public void appendTrace(PlotData plot) {
 		pd = ma;
 		TimeSeriesTrace<Object> ma_trace = createTrace("MA_" + itemType.toString());
+		plot.addTrace(ma_trace);
 		
-		pd = DataUtil.expSmooth(ma, 0.6, true);
-		TimeSeriesTrace<Object> exp_trace = createTrace("EXP_" + itemType.toString());
-		
-		pd = DataUtil.trendSmoothing(ma, 0.6, 0.9, true);
-		TimeSeriesTrace<Object> trend_trace = createTrace("TRD_" + itemType.toString());
-		
-		pd = DataUtil.generateForecast(ma, 0.6, 0.6, 0.9, TimeUnit.MILLISECONDS.convert(interval, unit), periods);
+		pd = DataUtil.generateForecast(ma, 0.6, 0.6, 0.9, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2, false);
 		TimeSeriesTrace<Object> forecast_trace = createTrace("F_" + itemType.toString());
-		//DataUtil.seasonalSmoothing(ma, 0.6, 0.6, periods, true);
-		
-		plot.addAll(
-				ma_trace,
-				exp_trace,
-				trend_trace,
-				forecast_trace);
+		plot.addTrace(forecast_trace);
 	}
-	
-	//Holt Winters
-	
 }

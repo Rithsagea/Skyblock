@@ -53,7 +53,7 @@ public class AnalyzerWindow {
 		
 		//Get Data
 		for(ItemType type : items) {
-			analyzers.add(new Analyzer(type, 10, 120, 12 * 24, TimeUnit.MINUTES));
+			analyzers.add(new Analyzer(type, 1, 1, 24, TimeUnit.HOURS));
 		}
 		
 		//Graph Rolling Average

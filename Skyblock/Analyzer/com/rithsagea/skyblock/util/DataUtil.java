@@ -14,6 +14,15 @@ import com.rithsagea.skyblock.api.Logger;
 import com.rithsagea.skyblock.api.datatypes.Datapoint;
 
 public class DataUtil {
+	public static double getAverage(Datapoint[] data) {
+		double sum = 0;
+		for(int x = 0; x < data.length; x++) {
+			sum += data[x].unit_price;
+		}
+		
+		return sum / data.length;
+	}
+	
 	public static int removeOutliers(List<Datapoint> data, double z_limit) {
 		int outlierCount = 0;
 		//calculate mean
@@ -148,23 +157,24 @@ public class DataUtil {
 		return newData;
 	}
 	
-	public static Datapoint[] trendSmoothing(Datapoint[] data, double alpha, double gamma, boolean debug) {
+	public static double[] trendSmoothing(Datapoint[] data, double alpha, double gamma, boolean debug) {
 		if(debug) {
 			Logger.log("-=-=- Trend Smoothing -=-=-");
 			Logger.log("Smoothing " + data.length + " elements.");
 		}
 		
-		Datapoint[] newData = new Datapoint[data.length];
+		
 		Datapoint[] simpExp = expSmooth(data, alpha, false);
+		double[] newData = new double[data.length];
 		double coefficient = 1 - gamma;
 		double sum = 0;
 		
-		newData[0] = simpExp[0];
+		newData[0] = simpExp[0].unit_price;
 		
 		for(int x = 1; x < data.length; x++) {
-			sum = gamma * (simpExp[x].unit_price - simpExp[x - 1].unit_price) + coefficient * newData[x - 1].unit_price;
+			sum = gamma * (simpExp[x].unit_price - simpExp[x - 1].unit_price) + coefficient * newData[x - 1];
 			
-			newData[x] = new Datapoint(simpExp[x].time, sum);
+			newData[x] = sum;
 		}
 		
 		if(debug) Logger.log("Final array has a total number of " + newData.length + " elements");
@@ -192,21 +202,66 @@ public class DataUtil {
 		return newData;
 	}
 	
-	public static Datapoint[] generateForecast(Datapoint[] data, double alpha, double beta, double gamma, long interval, int periods) {
+	//Holt Winters
+	public static Datapoint[] generateForecast(Datapoint[] data, double alpha, double beta, double gamma, long interval, int periods, int seasonsAhead, boolean debug) {
+		if(debug) {
+			Logger.log("-=-=- Forecaster -=-=-");
+			Logger.log("Calculating data for " + data.length + " datapoints.");
+		}
 		Datapoint[] smooth = expSmooth(data, alpha, false);
-		Datapoint[] trend = trendSmoothing(data, alpha, gamma, false);
+		double[] trend = trendSmoothing(data, alpha, gamma, false);
 		double[] season = seasonalSmoothing(data, alpha, beta, periods, false);
 		
+		if(debug) Logger.log("Generating forecast for the next " + seasonsAhead + " seasons.");
 		Datapoint[] forecast = new Datapoint[data.length];
 		
 		long periodLength = interval * periods;
 		double sum = 0;
 		
 		for(int x = 0; x < data.length; x++) {
-			sum = (smooth[x].unit_price + trend[x].unit_price) * season[x % periods];
+			sum = (smooth[x].unit_price + trend[x]) * season[x % periods];
 			forecast[x] = new Datapoint(new Timestamp(data[x].time.getTime() + periodLength), sum);
 		}
 		
+		if(debug) Logger.log("MSE: " + getMSE(data, forecast));
 		return forecast;
 	}
+	
+	//Optimization
+	public static double getMSE(Datapoint[] ma, Datapoint[] forecast) {
+		double mse = 0;
+		int offset = 0;
+		
+		for(int x = 0; x < ma.length; x++) {
+			if(ma[0].time.equals(forecast[x].time)) {
+				offset = x;
+				break;
+			}
+		}
+		
+		for(int x = offset; x < ma.length; x++)
+			mse += Math.pow(ma[x].unit_price - forecast[x - offset].unit_price, 2);
+		
+		mse /= ma.length - offset;
+		
+		return mse;
+	}
+	
+	public static double acceptProb(double a, double b, double c) {
+		return 0;
+	}
+	
+	public static double[] simAnnealing(Datapoint[] ma, long interval, int periods, int seasonsAhead) {
+		double par[] = {0, 0, 0};
+		
+		double accept = 0.3; //margin for error or something
+		double lim = getAverage(ma) * accept * (ma.length); //how small mse has to be or something
+		
+		
+		return par;
+	}
+	
+	//particle swarm
+	
+	//genetics
 }
