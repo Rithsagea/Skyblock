@@ -57,15 +57,17 @@ public class Analyzer {
 	private long window;
 	private TimeUnit unit;
 	
+	private int periods = 0;
+	
 	public Analyzer(ItemType itemType) throws SQLException {
-		this(itemType, 1, 1, TimeUnit.HOURS);
+		this(itemType, 1, 1, 24, TimeUnit.HOURS);
 	}
 	
-	public Analyzer(ItemType itemType, long interval, long window, TimeUnit unit) throws SQLException {
+	public Analyzer(ItemType itemType, long interval, long window, int periods, TimeUnit unit) throws SQLException {
 		this.itemType = itemType;
-		this.interval = interval;
-		this.window = window;
-		this.unit = unit;
+		
+		setRollingSettings(interval, window, unit);
+		this.periods = periods;
 		
 		updateData();
 		loadMovingAverage();
@@ -76,6 +78,8 @@ public class Analyzer {
 		this.interval = interval;
 		this.window = window;
 		this.unit = unit;
+		
+		
 	}
 	
 	public void updateData() throws SQLException {
@@ -98,23 +102,13 @@ public class Analyzer {
 	}
 	
 	public void cleanData() {
-		Datapoint firstPoint = null;
 		Datapoint lastPoint = new Datapoint(new Timestamp(0), 0, 0);
 		lastPoint.unit_price = 0;
 		for(int x = 0; x < pd.length; x++) {
 			if(Double.isNaN(pd[x].unit_price) || pd[x].unit_price < 0) {
 				pd[x].unit_price = lastPoint.unit_price;
 			} else {
-				if(firstPoint == null)firstPoint = pd[x];
 				lastPoint = pd[x];
-			}
-		}
-		
-		for(int x = 0; x < pd.length; x++) {
-			if(pd[x].unit_price == 0) {
-				pd[x].unit_price = firstPoint.unit_price;
-			} else {
-				break;
 			}
 		}
 	}
@@ -159,13 +153,18 @@ public class Analyzer {
 		pd = DataUtil.expSmooth(ma, 0.6, true);
 		TimeSeriesTrace<Object> exp_trace = createTrace("EXP_" + itemType.toString());
 		
-		pd = DataUtil.doubleExpSmooth(ma, 0.6, 0.9);
-		TimeSeriesTrace<Object> db_exp_trace = createTrace("DB_EXP_" + itemType.toString());
+		pd = DataUtil.trendSmoothing(ma, 0.6, 0.9, true);
+		TimeSeriesTrace<Object> trend_trace = createTrace("TRD_" + itemType.toString());
 		
-		plot.addAll(ma_trace,
-					exp_trace,
-					db_exp_trace);
+		pd = DataUtil.generateForecast(ma, 0.6, 0.6, 0.9, TimeUnit.MILLISECONDS.convert(interval, unit), periods);
+		TimeSeriesTrace<Object> forecast_trace = createTrace("F_" + itemType.toString());
+		//DataUtil.seasonalSmoothing(ma, 0.6, 0.6, periods, true);
 		
+		plot.addAll(
+				ma_trace,
+				exp_trace,
+				trend_trace,
+				forecast_trace);
 	}
 	
 	//Holt Winters

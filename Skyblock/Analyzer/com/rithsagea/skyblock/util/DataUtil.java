@@ -148,9 +148,11 @@ public class DataUtil {
 		return newData;
 	}
 	
-	public static Datapoint[] doubleExpSmooth(Datapoint[] data, double alpha, double gamma) {
-		Logger.log("-=-=- Double Exponential Smoothing -=-=-");
-		Logger.log("Smoothing " + data.length + " elements.");
+	public static Datapoint[] trendSmoothing(Datapoint[] data, double alpha, double gamma, boolean debug) {
+		if(debug) {
+			Logger.log("-=-=- Trend Smoothing -=-=-");
+			Logger.log("Smoothing " + data.length + " elements.");
+		}
 		
 		Datapoint[] newData = new Datapoint[data.length];
 		Datapoint[] simpExp = expSmooth(data, alpha, false);
@@ -160,16 +162,51 @@ public class DataUtil {
 		newData[0] = simpExp[0];
 		
 		for(int x = 1; x < data.length; x++) {
-			double a = simpExp[x].unit_price - simpExp[x - 1].unit_price;
-			double b = newData[x - 1].unit_price;
-			sum = gamma * (a) + coefficient * b;
+			sum = gamma * (simpExp[x].unit_price - simpExp[x - 1].unit_price) + coefficient * newData[x - 1].unit_price;
 			
 			newData[x] = new Datapoint(simpExp[x].time, sum);
 		}
 		
-		Logger.log("Final array has a total number of " + newData.length + " elements");
+		if(debug) Logger.log("Final array has a total number of " + newData.length + " elements");
 		return newData;
 	}
 	
+	public static double[] seasonalSmoothing(Datapoint[] data, double alpha, double beta, int periods, boolean debug) {
+		if(debug) {
+			Logger.log("-=-=- Seasonal Smoothing -=-=-");
+			Logger.log("Smoothing " + data.length + " elements.");
+		}
+		
+		double[] newData = new double[periods];
+		Datapoint[] simpExp = expSmooth(data, alpha, false);
+		double coefficient = 1 - beta;
+		int currPer = 1;
+		
+		for(int x = 1; x < data.length; x++) {
+			newData[currPer] = beta * (data[x].unit_price / Math.max(simpExp[x].unit_price, 1)) + coefficient * newData[currPer];
+			currPer++;
+			if(currPer >= periods)
+				currPer %= periods;
+		}
+		if(debug) Logger.log("Final array has a total number of " + newData.length + " elements");
+		return newData;
+	}
 	
+	public static Datapoint[] generateForecast(Datapoint[] data, double alpha, double beta, double gamma, long interval, int periods) {
+		Datapoint[] smooth = expSmooth(data, alpha, false);
+		Datapoint[] trend = trendSmoothing(data, alpha, gamma, false);
+		double[] season = seasonalSmoothing(data, alpha, beta, periods, false);
+		
+		Datapoint[] forecast = new Datapoint[data.length];
+		
+		long periodLength = interval * periods;
+		double sum = 0;
+		
+		for(int x = 0; x < data.length; x++) {
+			sum = (smooth[x].unit_price + trend[x].unit_price) * season[x % periods];
+			forecast[x] = new Datapoint(new Timestamp(data[x].time.getTime() + periodLength), sum);
+		}
+		
+		return forecast;
+	}
 }
