@@ -91,6 +91,7 @@ public class Analyzer {
 		start = TimeUtil.truncateTime(start);
 		end = TimeUtil.truncateTime(end);
 		
+		start.setTime(start.getTime() + TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
 		end.setTime(end.getTime() + TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
 		
 		pd = DataUtil.movingAverage(data, start, end, 1.5, interval, window, unit);
@@ -149,7 +150,9 @@ public class Analyzer {
 		TimeSeriesTrace<Object> ma_trace = createTrace("MA_" + itemType.toString());
 		plot.addTrace(ma_trace);
 		
-		pd = DataUtil.generateForecast(ma, 0.6, 0.6, 0.9, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2, true);
+		double[] pars = DataUtil.randWalkOpt(ma, 100000, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
+		
+		pd = DataUtil.generateForecast(ma, pars[0], pars[1], pars[2], TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2, true);
 		TimeSeriesTrace<Object> forecast_trace = createTrace("F_" + itemType.toString());
 		plot.addTrace(forecast_trace);
 	}

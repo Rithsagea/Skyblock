@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.StatUtils;
@@ -264,24 +265,45 @@ public class DataUtil {
 	}
 	
 	
-	public static double[] simAnnealing(Datapoint[] ma, int iterations, long interval, int periods, int seasonsAhead) {
-		double accept = 0.3; //margin of error target
+	public static double[] randWalkOpt(Datapoint[] ma, int iterations, long interval, int periods, int seasonsAhead) {
+		Logger.log("-=-=- RandomWalk Optimization -=-=-");
+		
+//		double accept = 0.2; //margin of error target
 		
 		double[] par = {0, 0, 0};
 		double[] newPar = {0, 0, 0};
-		double lim = Math.pow(getAverage(ma) * accept, 2) * (ma.length - (periods * seasonsAhead));
+//		double limit = Math.pow(getAverage(ma) * accept, 2);
+//		
+//		Logger.log("Limit: " + limit);
 		
-		double temperature = 0;
+		double newError = 0;
+		double error = Double.POSITIVE_INFINITY;
 		
+		Random rand = new Random();
 		Datapoint[] forecast;
 		
 		//run algorithm a lot of times
 		for(int x = 0; x < iterations; x++) {
-			forecast = generateForecast(ma, par[0], par[1], par[2]);
+			//push parameters
+			newPar[0] = rand.nextDouble();
+			newPar[1] = rand.nextDouble();
+			newPar[2] = rand.nextDouble();
 			
-			if(temperature < lim)
-				break;
+			forecast = generateForecast(ma, newPar[0], newPar[1], newPar[2], interval, periods, seasonsAhead, false);
+			newError = getMSE(ma, forecast);
+			
+			if(newError < error) {
+				error = newError;
+				par[0] = newPar[0];
+				par[1] = newPar[1];
+				par[2] = newPar[2];
+				Logger.log(String.format("[%d][%.2f,%.2f,%.2f]Error: %f", x, par[0], par[1], par[2], error));
+			}
 		}
+		
+		Logger.log("alpha: " + par[0]);
+		Logger.log("beta: " + par[1]);
+		Logger.log("gamma: " + par[2]);
 		
 		return par;
 	}
