@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.charts.dataviewer.DataViewer;
 import org.charts.dataviewer.api.config.DataViewerConfiguration;
@@ -52,7 +53,7 @@ public class AnalyzerWindow {
 		
 		//Get Data
 		for(ItemType type : items) {
-			analyzers.add(new Analyzer(type));
+			analyzers.add(new Analyzer(type, 10, 120, 12 * 24, TimeUnit.MINUTES));
 		}
 		
 		//Graph Rolling Average

@@ -78,8 +78,6 @@ public class Analyzer {
 		this.interval = interval;
 		this.window = window;
 		this.unit = unit;
-		
-		
 	}
 	
 	public void updateData() throws SQLException {
@@ -95,7 +93,7 @@ public class Analyzer {
 		
 		end.setTime(end.getTime() + TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
 		
-		pd = DataUtil.movingAverage(data, start, end, 1.5, window, interval, unit);
+		pd = DataUtil.movingAverage(data, start, end, 1.5, interval, window, unit);
 		cleanData();
 		ma = pd;
 		pd = null;
