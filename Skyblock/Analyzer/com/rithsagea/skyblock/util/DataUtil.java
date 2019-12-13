@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Random;
@@ -309,7 +310,7 @@ public class DataUtil {
 	}
 	
 	//genetics
-	private static class Genome {
+	private static class Genome implements Comparable<Genome> {
 		
 		public double alpha;
 		public double beta;
@@ -337,6 +338,11 @@ public class DataUtil {
 		public double[] toArray() {
 			return new double[] {alpha, beta, gamma};
 		}
+
+		@Override
+		public int compareTo(Genome o) {
+			return (int) (fitness - o.fitness);
+		}
 	}
 	
 	public static double[] geneticsOpt(Datapoint[] ma, int generations, int limit, long interval, int periods, int seasonsAhead) {
@@ -354,7 +360,7 @@ public class DataUtil {
 		}
 		
 		for(int x = 0; x < generations; x++) {
-			
+			Collections.sort(population);
 		}
 		
 		return population.get(0).toArray();
