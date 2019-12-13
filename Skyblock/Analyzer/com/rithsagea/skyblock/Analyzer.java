@@ -149,7 +149,7 @@ public class Analyzer {
 		TimeSeriesTrace<Object> ma_trace = createTrace("MA_" + itemType.toString());
 		plot.addTrace(ma_trace);
 		
-		pd = DataUtil.generateForecast(ma, 0.6, 0.6, 0.9, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2, false);
+		pd = DataUtil.generateForecast(ma, 0.6, 0.6, 0.9, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2, true);
 		TimeSeriesTrace<Object> forecast_trace = createTrace("F_" + itemType.toString());
 		plot.addTrace(forecast_trace);
 	}
