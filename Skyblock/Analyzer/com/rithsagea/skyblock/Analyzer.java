@@ -150,7 +150,8 @@ public class Analyzer {
 		TimeSeriesTrace<Object> ma_trace = createTrace("MA_" + itemType.toString());
 		plot.addTrace(ma_trace);
 		
-		double[] pars = DataUtil.randWalkOpt(ma, 100000, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
+//		double[] pars = DataUtil.randWalkOpt(ma, 100000, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
+		double[] pars = DataUtil.geneticsOpt(ma, 100, 10, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
 		
 		pd = DataUtil.generateForecast(ma, pars[0], pars[1], pars[2], TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2, true);
 		TimeSeriesTrace<Object> forecast_trace = createTrace("F_" + itemType.toString());

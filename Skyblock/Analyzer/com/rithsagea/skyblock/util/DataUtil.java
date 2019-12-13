@@ -324,10 +324,10 @@ public class DataUtil {
 			gamma = rand.nextDouble();
 		}
 		
-		public Genome(double alpha, double beta, double gamma) {
-			this.alpha = alpha;
-			this.beta = beta;
-			this.gamma = gamma;
+		public Genome(Genome p1, Genome p2) {
+			alpha = (p1.alpha + p2.alpha) / 2;
+			beta = (p1.beta + p2.beta) / 2;
+			gamma = (p1.gamma + p2.gamma) / 2;
 		}
 		
 		public void calcFitness(Datapoint[] ma, long interval, int periods, int seasonsAhead) {
@@ -346,23 +346,38 @@ public class DataUtil {
 	}
 	
 	public static double[] geneticsOpt(Datapoint[] ma, int generations, int limit, long interval, int periods, int seasonsAhead) {
-		Logger.log("Genetics Optimization");
+		Logger.log("-=-=- Genetics Optimization -=-=-");
 		
-		int populationLimit = limit;
+		int populationLimit = limit * limit;
 		Random rand = new Random();
 		
-		List<Genome> population = new ArrayList<Genome>();
+//		List<Genome> population = new ArrayList<Genome>();
+		Genome[] population = new Genome[populationLimit];
+		Genome[] parent = new Genome[limit];
 		
 		for(int x = 0; x < populationLimit; x++) {
 			Genome genome = new Genome(rand);
 			genome.calcFitness(ma, interval, periods, seasonsAhead);
-			population.add(genome);
+			population[x] = genome;
 		}
 		
 		for(int x = 0; x < generations; x++) {
-			Collections.sort(population);
+			Arrays.sort(population);
+			for(int y = 0; y < limit; y++) {
+				parent[y] = population[y];
+			}
+			
+			int position = 0;
+			
+			for(int a = 0; a < limit; a++) {
+				for(int b = 0; b < limit; b++) {
+					population[position] = new Genome(parent[a], parent[b]);
+					population[position].calcFitness(ma, interval, periods, seasonsAhead);
+					position++;
+				}
+			}
 		}
 		
-		return population.get(0).toArray();
+		return population[0].toArray();
 	}
 }
