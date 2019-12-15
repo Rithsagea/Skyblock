@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Random;
@@ -324,15 +323,25 @@ public class DataUtil {
 			gamma = rand.nextDouble();
 		}
 		
-		public Genome(Genome p1, Genome p2) {
-			alpha = (p1.alpha + p2.alpha) / 2;
-			beta = (p1.beta + p2.beta) / 2;
-			gamma = (p1.gamma + p2.gamma) / 2;
+		public void mutate(Genome p, Random rand, double mutationChance) {
+			
+			alpha = p.alpha;
+			beta = p.beta;
+			gamma = p.gamma;
+			
+			if(mutationChance > rand.nextDouble())
+				alpha = rand.nextDouble();
+			if(mutationChance > rand.nextDouble())
+				beta = rand.nextDouble();
+			if(mutationChance > rand.nextDouble())
+				gamma = rand.nextDouble();
 		}
 		
 		public void calcFitness(Datapoint[] ma, long interval, int periods, int seasonsAhead) {
 			Datapoint[] forecast = generateForecast(ma, alpha, beta, gamma, interval, periods, seasonsAhead, false);
 			fitness = getMSE(ma, forecast);
+			if(Double.isNaN(fitness) || fitness <= 0)
+				fitness = Double.POSITIVE_INFINITY;
 		}
 		
 		public double[] toArray() {
@@ -341,21 +350,27 @@ public class DataUtil {
 
 		@Override
 		public int compareTo(Genome o) {
-			return (int) (fitness - o.fitness);
+			if(fitness > o.fitness)
+				return 1;
+			if(fitness < o.fitness)
+				return -1;
+			return 0;
 		}
 	}
 	
 	public static double[] geneticsOpt(Datapoint[] ma, int generations, int limit, long interval, int periods, int seasonsAhead) {
 		Logger.log("-=-=- Genetics Optimization -=-=-");
-		
-		int populationLimit = limit * limit;
+		Logger.log("Simulating " + generations + " generations.");
 		Random rand = new Random();
 		
 //		List<Genome> population = new ArrayList<Genome>();
-		Genome[] population = new Genome[populationLimit];
-		Genome[] parent = new Genome[limit];
+		Genome[] population = new Genome[limit];
+		Genome best = null;
 		
-		for(int x = 0; x < populationLimit; x++) {
+		int generationsWithoutChange = 0;
+		double mutationChance = 0;
+		
+		for(int x = 0; x < limit; x++) {
 			Genome genome = new Genome(rand);
 			genome.calcFitness(ma, interval, periods, seasonsAhead);
 			population[x] = genome;
@@ -363,20 +378,28 @@ public class DataUtil {
 		
 		for(int x = 0; x < generations; x++) {
 			Arrays.sort(population);
-			for(int y = 0; y < limit; y++) {
-				parent[y] = population[y];
+			generationsWithoutChange++;
+			if(best != population[0]) {
+				generationsWithoutChange = 1;
 			}
 			
-			int position = 0;
+			mutationChance = Math.atan(generationsWithoutChange) / 2;
 			
-			for(int a = 0; a < limit; a++) {
-				for(int b = 0; b < limit; b++) {
-					population[position] = new Genome(parent[a], parent[b]);
-					population[position].calcFitness(ma, interval, periods, seasonsAhead);
-					position++;
-				}
+			best = population[0];
+			
+//			Logger.log("-=-=- Generation " + x + " -=-=-");
+//			Logger.log("Chance: " + mutationChance);
+//			Logger.log("Fitness: " + best.fitness);
+//			Logger.log("a: " + best.alpha);
+//			Logger.log("b: " + best.beta);
+//			Logger.log("c: " + best.gamma);
+			
+			for(int y = 1; y < limit; y++) {
+				population[y].mutate(best, rand, mutationChance);
 			}
 		}
+		
+		Arrays.sort(population);
 		
 		return population[0].toArray();
 	}
