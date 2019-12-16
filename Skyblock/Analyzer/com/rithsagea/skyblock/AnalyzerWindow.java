@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.GroupLayout.Alignment;
 
 import org.charts.dataviewer.DataViewer;
 import org.charts.dataviewer.api.config.DataViewerConfiguration;
@@ -84,7 +85,7 @@ public class AnalyzerWindow extends JFrame {
 		
 		layout.setHorizontalGroup(
 				layout.createSequentialGroup()
-					.addGroup(layout.createParallelGroup()	//panel for settings and buttons
+					.addGroup(layout.createParallelGroup(Alignment.CENTER)	//panel for settings and buttons
 							.addComponent(itemSettingsLabel)
 							.addGroup(layout.createSequentialGroup()
 									.addComponent(itemTypeLabel)
@@ -102,14 +103,14 @@ public class AnalyzerWindow extends JFrame {
 							.addGroup(layout.createSequentialGroup()
 									.addComponent(dayLabel)
 									.addComponent(dayTextField))
-							.addGroup(layout.createSequentialGroup())
+							.addGroup(layout.createSequentialGroup()
 									.addComponent(addButton)
-									.addComponent(graphButton))
+									.addComponent(graphButton)))
 					.addGroup(layout.createSequentialGroup()	//panel with all active analyzers
 							.addComponent(itemList)));
 		
 		layout.setVerticalGroup(
-				layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+				layout.createParallelGroup()
 					//Right Column
 					.addGroup(layout.createSequentialGroup()
 							.addComponent(itemSettingsLabel)
@@ -132,8 +133,7 @@ public class AnalyzerWindow extends JFrame {
 							.addGroup(layout.createParallelGroup()
 									.addComponent(addButton)
 									.addComponent(graphButton)))
-					//Left Column
-					.addComponent(itemList));
+					.addComponent(itemList));	//Left Column
 		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		pack();
@@ -195,14 +195,14 @@ public class AnalyzerWindow extends JFrame {
 	public static void main(String[] args) throws SQLException, IOException, InterruptedException {
 		AnalyzerWindow window = new AnalyzerWindow();
 		
-		ItemType[] items = new ItemType[] {  
-			ItemType.STRONG_DRAGON_HELMET,
-			ItemType.STRONG_DRAGON_CHESTPLATE,
-			ItemType.STRONG_DRAGON_LEGGINGS,
-			ItemType.STRONG_DRAGON_BOOTS
-			
-//			ItemType.STRONG_FRAGMENT
-		};
+//		ItemType[] items = new ItemType[] {  
+//			ItemType.STRONG_DRAGON_HELMET,
+//			ItemType.STRONG_DRAGON_CHESTPLATE,
+//			ItemType.STRONG_DRAGON_LEGGINGS,
+//			ItemType.STRONG_DRAGON_BOOTS
+//			
+////			ItemType.STRONG_FRAGMENT
+//		};
 		
 //		window.addItems(items);
 //		window.graphData();
