@@ -24,7 +24,12 @@ public class AnalyzerPanel extends JScrollPane {
 	
 	public void addAnalyzer(Analyzer analyzer) {
 		analyzers.add(analyzer);
-		analyzer.updateTrace();
+	}
+	
+	public void updateAnalyzers() {
+		for(Analyzer analyzer : analyzers) {
+			analyzer.updateTrace();
+		}
 	}
 	
 	public void calculateTraces() {
