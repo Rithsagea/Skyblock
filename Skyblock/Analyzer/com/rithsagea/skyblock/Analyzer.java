@@ -56,20 +56,23 @@ public class Analyzer {
 	private long interval;
 	private long window;
 	private TimeUnit unit;
+	private int daysAhead;
 	
 	private TimeSeriesTrace<Object> trace;
 	
 	private int periods = 0;
 	
 	public Analyzer(ItemType itemType) throws SQLException {
-		this(itemType, 1, 1, 24, TimeUnit.HOURS);
+		this(itemType, 1, 1, 24, 1, TimeUnit.HOURS);
 	}
 	
-	public Analyzer(ItemType itemType, long interval, long window, int periods, TimeUnit unit) throws SQLException {
+	public Analyzer(ItemType itemType, long interval, long window, int periods, int daysAhead, TimeUnit unit) throws SQLException {
 		this.itemType = itemType;
 		
 		setRollingSettings(interval, window, unit);
 		this.periods = periods;
+		
+		this.daysAhead = daysAhead;
 		
 		updateData();
 		loadMovingAverage();
@@ -150,7 +153,7 @@ public class Analyzer {
 	public void updateTrace() {
 		double[] pars = DataUtil.geneticsOpt(ma, 10000, 100, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
 		
-		pd = DataUtil.generateForecast(ma, pars[0], pars[1], pars[2], TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2, true);
+		pd = DataUtil.generateForecast(ma, pars[0], pars[1], pars[2], TimeUnit.MILLISECONDS.convert(interval, unit), periods, daysAhead, true);
 		TimeSeriesTrace<Object> forecast_trace = createTrace("F_" + itemType.toString());
 		trace = forecast_trace;
 	}
@@ -167,7 +170,7 @@ public class Analyzer {
 //		double[] pars = DataUtil.randWalkOpt(ma, 100000, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
 		double[] pars = DataUtil.geneticsOpt(ma, 10000, 100, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
 		
-		pd = DataUtil.generateForecast(ma, pars[0], pars[1], pars[2], TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2, true);
+		pd = DataUtil.generateForecast(ma, pars[0], pars[1], pars[2], TimeUnit.MILLISECONDS.convert(interval, unit), periods, daysAhead, true);
 		TimeSeriesTrace<Object> forecast_trace = createTrace("F_" + itemType.toString());
 		plot.addTrace(forecast_trace);
 	}

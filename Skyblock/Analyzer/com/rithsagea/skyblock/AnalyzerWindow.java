@@ -1,25 +1,31 @@
 package com.rithsagea.skyblock;
 
 import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
-import javax.swing.GroupLayout.Alignment;
+import javax.swing.text.NumberFormatter;
 
 import org.charts.dataviewer.DataViewer;
 import org.charts.dataviewer.api.config.DataViewerConfiguration;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
+import com.rithsagea.skyblock.api.Logger;
 import com.rithsagea.skyblock.api.datatypes.items.ItemType;
 import com.rithsagea.skyblock.graphics.AnalyzerPanel;
 
@@ -41,18 +47,35 @@ public class AnalyzerWindow extends JFrame {
 	private JLabel dayLabel;
 	
 	private JComboBox<ItemType> itemTypeComboBox;
-	private JTextField intervalTextField;
-	private JTextField windowTextField;
+	private JFormattedTextField intervalTextField;
+	private JFormattedTextField windowTextField;
 	private JComboBox<TimeUnit> timeUnitComboBox;
-	private JTextField dayTextField;
+	private JFormattedTextField dayTextField;
 	
 	private JButton addButton;
 	private JButton graphButton;
 	
 	private AnalyzerPanel itemList;
+	private JTextArea logTextArea;
 	
 	public AnalyzerWindow() {
 		super("Rithsagea's Skyblock Auction Analyzer");
+		
+		//Formatters
+		NumberFormat format = NumberFormat.getIntegerInstance();
+		
+		NumberFormatter longFormatter = new NumberFormatter(format);
+		
+		longFormatter.setValueClass(Long.class);
+		longFormatter.setAllowsInvalid(false);
+		longFormatter.setMinimum(0l);
+		
+		NumberFormatter intFormatter = new NumberFormatter(format);
+		
+		intFormatter.setValueClass(Integer.class);
+		intFormatter.setAllowsInvalid(false);
+		intFormatter.setMinimum(0);
+		
 		
 		//Components
 		itemSettingsLabel = new JLabel("Item Settings", SwingConstants.CENTER);
@@ -65,17 +88,33 @@ public class AnalyzerWindow extends JFrame {
 		dayLabel = new JLabel("Days Ahead: ");
 		
 		itemTypeComboBox = new JComboBox<ItemType>(ItemType.values());
-		intervalTextField = new JTextField();
-		windowTextField = new JTextField();
+		intervalTextField = new JFormattedTextField(longFormatter);
+		windowTextField = new JFormattedTextField(longFormatter);
 		timeUnitComboBox = new JComboBox<TimeUnit>(TimeUnit.values());
-		dayTextField = new JTextField();
+		dayTextField = new JFormattedTextField(intFormatter);
 		
 		addButton = new JButton("Add Item");
 		graphButton = new JButton("Graph Items");
 		
 		itemList = new AnalyzerPanel();
+		logTextArea = new JTextArea("-=-=- Logger -=-=-");
+		logTextArea.setEditable(false);
 		
-		//Layout
+		initLayout();
+		initListeners();
+		
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		pack();
+		setVisible(true);
+		
+		db = new DatabaseConnection();
+		dataviewer = new DataViewer("analyzer");
+		
+		Analyzer.db = db;
+		initDataviewer();
+	}
+	
+	public void initLayout() {
 		Container contentPanel = getContentPane();
 		GroupLayout layout = new GroupLayout(contentPanel);
 		contentPanel.setLayout(layout);
@@ -107,7 +146,8 @@ public class AnalyzerWindow extends JFrame {
 									.addComponent(addButton)
 									.addComponent(graphButton)))
 					.addGroup(layout.createSequentialGroup()	//panel with all active analyzers
-							.addComponent(itemList)));
+							.addComponent(itemList)
+							.addComponent(logTextArea)));
 		
 		layout.setVerticalGroup(
 				layout.createParallelGroup()
@@ -133,17 +173,45 @@ public class AnalyzerWindow extends JFrame {
 							.addGroup(layout.createParallelGroup()
 									.addComponent(addButton)
 									.addComponent(graphButton)))
-					.addComponent(itemList));	//Left Column
-		
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		pack();
-		setVisible(true);
-		
-		db = new DatabaseConnection();
-		dataviewer = new DataViewer("analyzer");
-		
-		Analyzer.db = db;
-		initDataviewer();
+					.addGroup(layout.createParallelGroup(Alignment.LEADING)	//right 2 columns
+							.addComponent(itemList)							//list of analyzers
+							.addComponent(logTextArea)));					//the log
+	}
+	
+	public void initListeners() {
+		addButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(intervalTextField.getText().isEmpty()) {
+					Logger.log("The [Interval] text field is empty!");
+					return;
+				}
+				if(windowTextField.getText().isEmpty()) {
+					Logger.log("The [Window] text field is empty!");
+					return;
+				}
+				if(dayTextField.getText().isEmpty()) {
+					Logger.log("The [Days Ahead] text field is empty!");
+					return;
+				}
+				
+				ItemType type = (ItemType) itemTypeComboBox.getSelectedItem();
+				long interval = Long.parseLong(intervalTextField.getText());
+				long window = Long.parseLong(windowTextField.getText());
+				TimeUnit unit = (TimeUnit) timeUnitComboBox.getSelectedItem();
+				int daysAhead = Integer.parseInt(dayTextField.getText());
+				
+				try {
+					addAnalyzer(type, interval, window, 24, daysAhead, unit);
+				} catch (SQLException e1) {
+					Logger.log("Error with SQL, please try again");
+				}
+				
+				Logger.log("Add " + type + " with interval " + interval + " and window " + window);
+			}
+			
+		});
 	}
 	
 	public void initDataviewer() {
@@ -161,12 +229,12 @@ public class AnalyzerWindow extends JFrame {
 		itemList.addAnalyzer(analyzer);
 	}
 	
-	public void addAnalyzer(ItemType item, long interval, long window, int period, TimeUnit unit) throws SQLException {
-		addAnalyzer(new Analyzer(item, interval, window, period, unit));
+	public void addAnalyzer(ItemType item, long interval, long window, int period, int daysAhead, TimeUnit unit) throws SQLException {
+		addAnalyzer(new Analyzer(item, interval, window, period, daysAhead, unit));
 	}
 	
 	public void addAnalyzer(ItemType item) throws SQLException {
-		addAnalyzer(item, 1, 1, 24, TimeUnit.HOURS);
+		addAnalyzer(item, 1, 1, 24, 1, TimeUnit.HOURS);
 	}
 	
 	public void addItem(ItemType item) throws SQLException {
