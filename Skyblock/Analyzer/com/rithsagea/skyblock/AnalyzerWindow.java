@@ -234,7 +234,7 @@ public class AnalyzerWindow extends JFrame {
 	}
 	
 	public void addAnalyzer(ItemType item) throws SQLException {
-		addAnalyzer(item, 1, 1, 24, 1, TimeUnit.HOURS);
+		addAnalyzer(item, 1, 1, 24, 2, TimeUnit.HOURS);
 	}
 	
 	public void addItem(ItemType item) throws SQLException {
@@ -263,17 +263,17 @@ public class AnalyzerWindow extends JFrame {
 	public static void main(String[] args) throws SQLException, IOException, InterruptedException {
 		AnalyzerWindow window = new AnalyzerWindow();
 		
-//		ItemType[] items = new ItemType[] {  
+		ItemType[] items = new ItemType[] {  
 //			ItemType.STRONG_DRAGON_HELMET,
 //			ItemType.STRONG_DRAGON_CHESTPLATE,
 //			ItemType.STRONG_DRAGON_LEGGINGS,
-//			ItemType.STRONG_DRAGON_BOOTS
-//			
-////			ItemType.STRONG_FRAGMENT
-//		};
+			ItemType.STRONG_DRAGON_BOOTS
+			
+//			ItemType.STRONG_FRAGMENT
+		};
 		
-//		window.addItems(items);
-//		window.graphData();
+		window.addItems(items);
+		window.graphData();
 		
 		//URL Here:
 		//http://localhost:8090/view/analyzer

@@ -30,7 +30,8 @@ public class AnalyzerPanel extends JScrollPane {
 	public void calculateTraces() {
 		maData = new PlotData();
 		for(Analyzer analyzer : analyzers) {
-			maData.addTrace(analyzer.getTrace());
+			analyzer.appendTrace(maData);
+//			maData.addTrace(analyzer.getTrace());
 		}
 	}
 	
