@@ -23,6 +23,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.text.NumberFormatter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.charts.dataviewer.DataViewer;
 import org.charts.dataviewer.api.config.DataViewerConfiguration;
 
@@ -35,7 +36,8 @@ import com.rithsagea.skyblock.graphics.AnalyzerPanel;
 public class AnalyzerWindow extends JFrame {
 	
 	private static final long serialVersionUID = -2765575597712416061L;
-
+	private static final int logLength = 14;
+	
 	private final DatabaseConnection db;
 	
 	private final DataViewer dataviewer;
@@ -67,7 +69,7 @@ public class AnalyzerWindow extends JFrame {
 		super("Rithsagea's Skyblock Auction Analyzer");
 		
 		//Logger
-		logQueue = new DroppingQueue<String>(13);
+		logQueue = new DroppingQueue<String>(logLength);
 		Logger.addListener(logQueue);
 		
 		//Timer
@@ -115,15 +117,18 @@ public class AnalyzerWindow extends JFrame {
 		graphButton = new JButton("Graph Items");
 		
 		itemList = new AnalyzerPanel();
-		logTextArea = new JTextArea();
+		//find a better way to deal with the initial layout
+		logTextArea = new JTextArea(StringUtils.repeat(' ', 150) + StringUtils.repeat('\n', logLength - 1));
 		logTextArea.setEditable(false);
 		
 		initLayout();
-		initListeners();
 		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		pack();
-		setVisible(true);
+		
+		initListeners();
+		
+		setVisible(true);		
 	}
 	
 	public void initLayout() {
@@ -134,8 +139,8 @@ public class AnalyzerWindow extends JFrame {
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		
-		layout.setHorizontalGroup(
-				layout.createSequentialGroup()
+		layout.setHorizontalGroup(layout.createParallelGroup()
+				.addGroup(layout.createSequentialGroup()
 					.addGroup(layout.createParallelGroup(Alignment.CENTER)	//panel for settings and buttons
 							.addComponent(itemSettingsLabel)
 							.addGroup(layout.createSequentialGroup()
@@ -156,16 +161,16 @@ public class AnalyzerWindow extends JFrame {
 									.addComponent(dayTextField))
 							.addGroup(layout.createSequentialGroup()
 									.addComponent(addButton)
-									.addComponent(graphButton)))
-					.addGroup(layout.createSequentialGroup()	//panel with all active analyzers
-							.addComponent(itemList)
-							.addComponent(logTextArea)));
+									.addComponent(graphButton))) //panel with all active analyzers
+					.addComponent(itemList))
+				.addComponent(logTextArea));
 		
 		layout.setVerticalGroup(
-				layout.createParallelGroup()
+				layout.createSequentialGroup()
+					.addGroup(layout.createParallelGroup()
 					//Right Column
-					.addGroup(layout.createSequentialGroup()
-							.addComponent(itemSettingsLabel)
+							.addGroup(layout.createSequentialGroup()
+								.addComponent(itemSettingsLabel)
 							.addGroup(layout.createParallelGroup()
 									.addComponent(itemTypeLabel)
 									.addComponent(itemTypeComboBox))
@@ -185,9 +190,8 @@ public class AnalyzerWindow extends JFrame {
 							.addGroup(layout.createParallelGroup()
 									.addComponent(addButton)
 									.addComponent(graphButton)))
-					.addGroup(layout.createParallelGroup(Alignment.LEADING)	//right 2 columns
-							.addComponent(itemList)							//list of analyzers
-							.addComponent(logTextArea)));					//the log
+							.addComponent(itemList)) //list of analyzers
+					.addComponent(logTextArea)); //the log
 	}
 	
 	public void initListeners() {
@@ -215,12 +219,10 @@ public class AnalyzerWindow extends JFrame {
 				int daysAhead = Integer.parseInt(dayTextField.getText());
 				
 				try {
-					addAnalyzer(type, interval, window, 24, daysAhead, unit);
+					addAnalyzer(type, interval, window, (int) (unit.convert(1, TimeUnit.DAYS) / interval), daysAhead, unit);
 				} catch (SQLException e1) {
 					Logger.log("Error with SQL, please try again");
 				}
-				
-				Logger.log("Add " + type + " with interval " + interval + " and window " + window);
 			}
 			
 		});
@@ -244,7 +246,7 @@ public class AnalyzerWindow extends JFrame {
 				logTextArea.setText(builder.toString());
 			}
 			
-		}, 0, 100);
+		}, 0, 1000);
 	}
 	
 	public void initDataviewer() {
@@ -266,10 +268,6 @@ public class AnalyzerWindow extends JFrame {
 		addAnalyzer(new Analyzer(item, interval, window, period, daysAhead, unit));
 	}
 	
-	public void addAnalyzer(ItemType item) throws SQLException {
-		addAnalyzer(item, 1, 1, 24, 2, TimeUnit.HOURS);
-	}
-	
 	public void graphData() throws SQLException {
 		itemList.calculateTraces();
 		dataviewer.updatePlot(itemList.getPlotData());
@@ -286,17 +284,17 @@ public class AnalyzerWindow extends JFrame {
 	public static void main(String[] args) throws SQLException, IOException, InterruptedException {
 		AnalyzerWindow window = new AnalyzerWindow();
 		
-		ItemType[] items = new ItemType[] {  
+//		ItemType[] items = new ItemType[] {  
 //			ItemType.STRONG_DRAGON_HELMET,
 //			ItemType.STRONG_DRAGON_CHESTPLATE,
 //			ItemType.STRONG_DRAGON_LEGGINGS,
-			ItemType.STRONG_DRAGON_BOOTS
+//			ItemType.STRONG_DRAGON_BOOTS
 			
 //			ItemType.STRONG_FRAGMENT
-		};
+//		};
 		
 //		window.addItems(items);
-		window.graphData();
+//		window.graphData();
 		
 		//URL Here:
 		//http://localhost:8090/view/analyzer
