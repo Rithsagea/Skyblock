@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.GroupLayout;
@@ -26,6 +28,7 @@ import org.charts.dataviewer.api.config.DataViewerConfiguration;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.Logger;
+import com.rithsagea.skyblock.api.datatypes.DroppingQueue;
 import com.rithsagea.skyblock.api.datatypes.items.ItemType;
 import com.rithsagea.skyblock.graphics.AnalyzerPanel;
 
@@ -36,6 +39,8 @@ public class AnalyzerWindow extends JFrame {
 	private final DatabaseConnection db;
 	
 	private final DataViewer dataviewer;
+	private final DroppingQueue<String> logQueue;
+	private final Timer timer;
 	
 	private JLabel itemSettingsLabel;
 	private JLabel timeSettingsLabel;
@@ -61,6 +66,20 @@ public class AnalyzerWindow extends JFrame {
 	public AnalyzerWindow() {
 		super("Rithsagea's Skyblock Auction Analyzer");
 		
+		//Logger
+		logQueue = new DroppingQueue<String>(13);
+		Logger.addListener(logQueue);
+		
+		//Timer
+		timer = new Timer();
+		
+		//Initialize functional stuff
+		db = new DatabaseConnection();
+		dataviewer = new DataViewer("analyzer");
+		
+		Analyzer.db = db;
+		initDataviewer();
+		
 		//Formatters
 		NumberFormat format = NumberFormat.getIntegerInstance();
 		
@@ -75,7 +94,6 @@ public class AnalyzerWindow extends JFrame {
 		intFormatter.setValueClass(Integer.class);
 		intFormatter.setAllowsInvalid(false);
 		intFormatter.setMinimum(0);
-		
 		
 		//Components
 		itemSettingsLabel = new JLabel("Item Settings", SwingConstants.CENTER);
@@ -97,7 +115,7 @@ public class AnalyzerWindow extends JFrame {
 		graphButton = new JButton("Graph Items");
 		
 		itemList = new AnalyzerPanel();
-		logTextArea = new JTextArea("-=-=- Logger -=-=-");
+		logTextArea = new JTextArea();
 		logTextArea.setEditable(false);
 		
 		initLayout();
@@ -106,12 +124,6 @@ public class AnalyzerWindow extends JFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		pack();
 		setVisible(true);
-		
-		db = new DatabaseConnection();
-		dataviewer = new DataViewer("analyzer");
-		
-		Analyzer.db = db;
-		initDataviewer();
 	}
 	
 	public void initLayout() {
@@ -212,6 +224,27 @@ public class AnalyzerWindow extends JFrame {
 			}
 			
 		});
+		
+		graphButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				itemList.updateAnalyzers();
+			}
+		});
+		
+		timer.scheduleAtFixedRate(new TimerTask() {
+			
+			StringBuilder builder = new StringBuilder();
+			
+			@Override
+			public void run() {
+				
+				builder.setLength(0);
+				logQueue.iterator().forEachRemaining(builder::append);
+				logTextArea.setText(builder.toString());
+			}
+			
+		}, 0, 100);
 	}
 	
 	public void initDataviewer() {
@@ -235,16 +268,6 @@ public class AnalyzerWindow extends JFrame {
 	
 	public void addAnalyzer(ItemType item) throws SQLException {
 		addAnalyzer(item, 1, 1, 24, 2, TimeUnit.HOURS);
-	}
-	
-	public void addItem(ItemType item) throws SQLException {
-		addAnalyzer(item);
-	}
-	
-	public void addItems(ItemType...itemTypes) throws SQLException {
-		for(ItemType item : itemTypes) {
-			addAnalyzer(item);
-		}
 	}
 	
 	public void graphData() throws SQLException {
