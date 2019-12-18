@@ -295,7 +295,7 @@ public class AnalyzerWindow extends JFrame {
 //			ItemType.STRONG_FRAGMENT
 		};
 		
-		window.addItems(items);
+//		window.addItems(items);
 		window.graphData();
 		
 		//URL Here:
