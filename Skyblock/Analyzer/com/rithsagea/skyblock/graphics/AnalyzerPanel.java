@@ -57,6 +57,7 @@ public class AnalyzerPanel extends JScrollPane {
 	public void updateAnalyzers() {
 		for(Analyzer analyzer : analyzers) {
 			analyzer.updateTrace();
+			maData.addTrace(analyzer.getTrace());
 		}
 	}
 	

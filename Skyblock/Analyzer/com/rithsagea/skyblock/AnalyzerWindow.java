@@ -230,6 +230,7 @@ public class AnalyzerWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				itemList.updateAnalyzers();
+				dataviewer.updatePlot(itemList.getPlotData());
 			}
 		});
 		
