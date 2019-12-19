@@ -15,11 +15,11 @@ public class AnalyzerPanel extends JScrollPane {
 	
 	private static final long serialVersionUID = 1560570364551331910L;
 	private List<Analyzer> analyzers = new ArrayList<Analyzer>();
-	private PlotData maData;
+	private PlotData plotData;
 	private JTable table;
 	
 	public AnalyzerPanel() {
-		maData = new PlotData();
+		plotData = new PlotData();
 		table = new JTable(0, 5);
 		
 		@SuppressWarnings("serial")
@@ -57,19 +57,19 @@ public class AnalyzerPanel extends JScrollPane {
 	public void updateAnalyzers() {
 		for(Analyzer analyzer : analyzers) {
 			analyzer.updateTrace();
-			maData.addTrace(analyzer.getTrace());
+			plotData.addTrace(analyzer.getTrace());
 		}
 	}
 	
 	public void calculateTraces() {
-		maData = new PlotData();
+		plotData = new PlotData();
 		for(Analyzer analyzer : analyzers) {
-			analyzer.appendTrace(maData);
+			analyzer.appendTrace(plotData);
 //			maData.addTrace(analyzer.getTrace());
 		}
 	}
 	
 	public PlotData getPlotData() {
-		return maData;
+		return plotData;
 	}
 }

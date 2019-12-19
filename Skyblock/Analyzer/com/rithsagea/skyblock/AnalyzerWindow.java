@@ -23,14 +23,18 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.text.NumberFormatter;
 
-import org.charts.dataviewer.DataViewer;
+import org.apache.commons.lang3.StringUtils;
 import org.charts.dataviewer.api.config.DataViewerConfiguration;
+import org.charts.dataviewer.javafx.JavaFxDataViewer;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.Logger;
 import com.rithsagea.skyblock.api.datatypes.DroppingQueue;
 import com.rithsagea.skyblock.api.datatypes.items.ItemType;
 import com.rithsagea.skyblock.graphics.AnalyzerPanel;
+
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
 
 public class AnalyzerWindow extends JFrame {
 	
@@ -39,7 +43,6 @@ public class AnalyzerWindow extends JFrame {
 	
 	private final DatabaseConnection db;
 	
-	private final DataViewer dataviewer;
 	private final DroppingQueue<String> logQueue;
 	private final Timer timer;
 	
@@ -63,6 +66,9 @@ public class AnalyzerWindow extends JFrame {
 	
 	private AnalyzerPanel itemList;
 	private JTextArea logTextArea;
+	private JFXPanel dataPanel;
+	
+	private JavaFxDataViewer dataviewer;
 	
 	public AnalyzerWindow() {
 		super("Rithsagea's Skyblock Auction Analyzer");
@@ -76,10 +82,9 @@ public class AnalyzerWindow extends JFrame {
 		
 		//Initialize functional stuff
 		db = new DatabaseConnection();
-		dataviewer = new DataViewer("analyzer");
 		
 		Analyzer.db = db;
-		initDataviewer();
+		getConfiguration();
 		
 		//Formatters
 		NumberFormat format = NumberFormat.getIntegerInstance();
@@ -116,9 +121,18 @@ public class AnalyzerWindow extends JFrame {
 		graphButton = new JButton("Graph Items");
 		
 		itemList = new AnalyzerPanel();
-		//find a better way to deal with the initial layout
-		logTextArea = new JTextArea();
+		logTextArea = new JTextArea(StringUtils.repeat('\n', logLength));
 		logTextArea.setEditable(false);
+		
+		DataViewerConfiguration config = getConfiguration();
+		
+		dataviewer = new JavaFxDataViewer();
+		dataviewer.updateConfiguration(config);
+		
+		dataPanel = new JFXPanel();
+//		dataPanel.setScene(new Scene() {
+//			
+//		});
 		
 		initLayout();
 		
@@ -138,31 +152,32 @@ public class AnalyzerWindow extends JFrame {
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		
-		layout.setHorizontalGroup(layout.createParallelGroup()
-				.addGroup(layout.createSequentialGroup()
-					.addGroup(layout.createParallelGroup(Alignment.CENTER)	//panel for settings and buttons
-							.addComponent(itemSettingsLabel)
-							.addGroup(layout.createSequentialGroup()
-									.addComponent(itemTypeLabel)
-									.addComponent(itemTypeComboBox))
-							.addComponent(timeSettingsLabel)
-							.addGroup(layout.createSequentialGroup()
-									.addComponent(intervalLabel)
-									.addComponent(intervalTextField))
-							.addGroup(layout.createSequentialGroup()
-									.addComponent(windowLabel)
-									.addComponent(windowTextField))
-							.addGroup(layout.createSequentialGroup()
-									.addComponent(timeUnitLabel)
-									.addComponent(timeUnitComboBox))
-							.addGroup(layout.createSequentialGroup()
-									.addComponent(dayLabel)
-									.addComponent(dayTextField))
-							.addGroup(layout.createSequentialGroup()
-									.addComponent(addButton)
-									.addComponent(graphButton))) //panel with all active analyzers
-					.addComponent(itemList))
-				.addComponent(logTextArea));
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup()
+					.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createParallelGroup(Alignment.CENTER)	//panel for settings and buttons
+								.addComponent(itemSettingsLabel)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(itemTypeLabel)
+										.addComponent(itemTypeComboBox))
+								.addComponent(timeSettingsLabel)
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(intervalLabel)
+										.addComponent(intervalTextField))
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(windowLabel)
+										.addComponent(windowTextField))
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(timeUnitLabel)
+										.addComponent(timeUnitComboBox))
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(dayLabel)
+										.addComponent(dayTextField))
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(addButton)
+										.addComponent(graphButton))) //panel with all active analyzers
+						.addComponent(itemList))
+					.addComponent(logTextArea)));
 		
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
@@ -249,7 +264,7 @@ public class AnalyzerWindow extends JFrame {
 		}, 10000, 1000);
 	}
 	
-	public void initDataviewer() {
+	public DataViewerConfiguration getConfiguration() {
 		DataViewerConfiguration config = new DataViewerConfiguration();
 		config.setPlotTitle("Moving Averages");
 		config.setxAxisTitle("Time");
@@ -257,7 +272,7 @@ public class AnalyzerWindow extends JFrame {
 		config.setMarginBottom(250);
 		config.showLegend(true);
 		config.setLegendInsidePlot(false);
-		dataviewer.updateConfiguration(config);
+		return config;
 	}
 	
 	public void addAnalyzer(Analyzer analyzer) {
