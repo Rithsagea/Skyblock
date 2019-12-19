@@ -44,7 +44,7 @@ public class Analyzer {
 	}
 
 	public static DatabaseConnection db;
-	private final ItemType itemType;
+	public final ItemType itemType;
 	
 	private Datapoint[] data;
 	private Datapoint[] ma;
@@ -53,10 +53,10 @@ public class Analyzer {
 	private Object[] values;
 	private Timestamp[] time;
 	
-	private long interval;
-	private long window;
-	private TimeUnit unit;
-	private int daysAhead;
+	public long interval;
+	public long window;
+	public TimeUnit unit;
+	public int daysAhead;
 	
 	private TimeSeriesTrace<Object> trace;
 	

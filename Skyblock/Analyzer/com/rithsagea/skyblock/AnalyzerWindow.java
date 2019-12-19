@@ -23,7 +23,6 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.text.NumberFormatter;
 
-import org.apache.commons.lang3.StringUtils;
 import org.charts.dataviewer.DataViewer;
 import org.charts.dataviewer.api.config.DataViewerConfiguration;
 
@@ -118,7 +117,7 @@ public class AnalyzerWindow extends JFrame {
 		
 		itemList = new AnalyzerPanel();
 		//find a better way to deal with the initial layout
-		logTextArea = new JTextArea(StringUtils.repeat(' ', 150) + StringUtils.repeat('\n', logLength - 1));
+		logTextArea = new JTextArea();
 		logTextArea.setEditable(false);
 		
 		initLayout();
@@ -246,7 +245,7 @@ public class AnalyzerWindow extends JFrame {
 				logTextArea.setText(builder.toString());
 			}
 			
-		}, 0, 1000);
+		}, 10000, 1000);
 	}
 	
 	public void initDataviewer() {
@@ -282,19 +281,8 @@ public class AnalyzerWindow extends JFrame {
 	}
 	
 	public static void main(String[] args) throws SQLException, IOException, InterruptedException {
+		@SuppressWarnings("unused")
 		AnalyzerWindow window = new AnalyzerWindow();
-		
-//		ItemType[] items = new ItemType[] {  
-//			ItemType.STRONG_DRAGON_HELMET,
-//			ItemType.STRONG_DRAGON_CHESTPLATE,
-//			ItemType.STRONG_DRAGON_LEGGINGS,
-//			ItemType.STRONG_DRAGON_BOOTS
-			
-//			ItemType.STRONG_FRAGMENT
-//		};
-		
-//		window.addItems(items);
-//		window.graphData();
 		
 		//URL Here:
 		//http://localhost:8090/view/analyzer
