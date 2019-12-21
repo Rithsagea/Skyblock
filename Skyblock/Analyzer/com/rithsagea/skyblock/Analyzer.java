@@ -7,6 +7,11 @@ import java.nio.file.Paths;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.csv.CSVFormat;
@@ -59,6 +64,7 @@ public class Analyzer {
 	public int daysAhead;
 	
 	private TimeSeriesTrace<Object> trace;
+	private Calendar calendar;
 	
 	private int periods = 0;
 	
@@ -73,6 +79,8 @@ public class Analyzer {
 		this.periods = periods;
 		
 		this.daysAhead = daysAhead;
+		
+		calendar = new GregorianCalendar(TimeZone.getTimeZone("EST"));
 		
 		updateData();
 		loadMovingAverage();
@@ -132,10 +140,23 @@ public class Analyzer {
 	}
 	
 	public void loadData() {
-		values = new Object[pd.length];
-		time = new Timestamp[pd.length];
 		
-		for(int x = 0; x < pd.length; x++) {
+		List<Datapoint> data = new ArrayList<Datapoint>();
+		
+		Timestamp now = new Timestamp(calendar.getTimeInMillis());
+		
+		for(Datapoint point : pd) {
+			if(point.time.after(now)) {
+				data.add(point);
+			}
+		}
+		
+		int len = data.size();
+		
+		values = new Object[data.size()];
+		time = new Timestamp[data.size()];
+		
+		for(int x = 0; x < len; x++) {
 			values[x] = pd[x].unit_price;
 			time[x] = pd[x].time;
 		}
@@ -143,6 +164,7 @@ public class Analyzer {
 	
 	public TimeSeriesTrace<Object> createTrace(String name) {
 		loadData();
+		
 		TimeSeriesTrace<Object> trace = new TimeSeriesTrace<>(name);
 		trace.setxArray(time);
 		trace.setyArray(values);

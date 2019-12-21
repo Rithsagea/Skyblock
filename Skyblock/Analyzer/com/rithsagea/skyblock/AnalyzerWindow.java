@@ -24,17 +24,14 @@ import javax.swing.SwingConstants;
 import javax.swing.text.NumberFormatter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.charts.dataviewer.DataViewer;
 import org.charts.dataviewer.api.config.DataViewerConfiguration;
-import org.charts.dataviewer.javafx.JavaFxDataViewer;
 
 import com.rithsagea.skyblock.api.DatabaseConnection;
 import com.rithsagea.skyblock.api.Logger;
 import com.rithsagea.skyblock.api.datatypes.DroppingQueue;
 import com.rithsagea.skyblock.api.datatypes.items.ItemType;
 import com.rithsagea.skyblock.graphics.AnalyzerPanel;
-
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
 
 public class AnalyzerWindow extends JFrame {
 	
@@ -46,29 +43,29 @@ public class AnalyzerWindow extends JFrame {
 	private final DroppingQueue<String> logQueue;
 	private final Timer timer;
 	
-	private JLabel itemSettingsLabel;
-	private JLabel timeSettingsLabel;
+	private final JLabel itemSettingsLabel;
+	private final JLabel timeSettingsLabel;
 	
-	private JLabel itemTypeLabel;
-	private JLabel intervalLabel;
-	private JLabel windowLabel;
-	private JLabel timeUnitLabel;
-	private JLabel dayLabel;
+	private final JLabel itemTypeLabel;
+	private final JLabel intervalLabel;
+	private final JLabel windowLabel;
+	private final JLabel timeUnitLabel;
+	private final JLabel dayLabel;
 	
-	private JComboBox<ItemType> itemTypeComboBox;
-	private JFormattedTextField intervalTextField;
-	private JFormattedTextField windowTextField;
-	private JComboBox<TimeUnit> timeUnitComboBox;
-	private JFormattedTextField dayTextField;
+	private final JComboBox<ItemType> itemTypeComboBox;
+	private final JFormattedTextField intervalTextField;
+	private final JFormattedTextField windowTextField;
+	private final JComboBox<TimeUnit> timeUnitComboBox;
+	private final JFormattedTextField dayTextField;
 	
-	private JButton addButton;
-	private JButton graphButton;
+	private final JButton addButton;
+	private final JButton graphButton;
+	private final JButton clearButton;
 	
-	private AnalyzerPanel itemList;
-	private JTextArea logTextArea;
-	private JFXPanel dataPanel;
+	private final AnalyzerPanel itemList;
+	private final JTextArea logTextArea;
 	
-	private JavaFxDataViewer dataviewer;
+	private DataViewer dataviewer;
 	
 	public AnalyzerWindow() {
 		super("Rithsagea's Skyblock Auction Analyzer");
@@ -119,29 +116,32 @@ public class AnalyzerWindow extends JFrame {
 		
 		addButton = new JButton("Add Item");
 		graphButton = new JButton("Graph Items");
+		clearButton = new JButton("Clear Graph");
 		
 		itemList = new AnalyzerPanel();
 		logTextArea = new JTextArea(StringUtils.repeat('\n', logLength));
 		logTextArea.setEditable(false);
 		
-		DataViewerConfiguration config = getConfiguration();
-		
-		dataviewer = new JavaFxDataViewer();
-		dataviewer.updateConfiguration(config);
-		
-		dataPanel = new JFXPanel();
-//		dataPanel.setScene(new Scene() {
-//			
-//		});
-		
+		dataviewer = new DataViewer("skyblock");
+		dataviewer.updateConfiguration(getConfiguration());
+	}
+	
+//	public void initJFX() {
+//		dataviewer = new JavaFxDataViewer();
+//		dataviewer.updateConfiguration(getConfiguration());
+//		
+//		dataPanel = new JFXPanel();
+//		dataPanel.setScene(new Scene(dataviewer));
+//	}
+	
+	public void initWindow() {
 		initLayout();
-		
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		pack();
 		
 		initListeners();
 		
-		setVisible(true);		
+		setVisible(true);	
 	}
 	
 	public void initLayout() {
@@ -152,8 +152,7 @@ public class AnalyzerWindow extends JFrame {
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
 		
-		layout.setHorizontalGroup(layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup()
+		layout.setHorizontalGroup(layout.createParallelGroup()
 					.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup(Alignment.CENTER)	//panel for settings and buttons
 								.addComponent(itemSettingsLabel)
@@ -175,37 +174,39 @@ public class AnalyzerWindow extends JFrame {
 										.addComponent(dayTextField))
 								.addGroup(layout.createSequentialGroup()
 										.addComponent(addButton)
-										.addComponent(graphButton))) //panel with all active analyzers
-						.addComponent(itemList))
-					.addComponent(logTextArea)));
+										.addComponent(graphButton)
+										.addComponent(clearButton)))
+						.addComponent(itemList)) //panel with all active analyzers
+					.addComponent(logTextArea));
 		
 		layout.setVerticalGroup(
 				layout.createSequentialGroup()
-					.addGroup(layout.createParallelGroup()
-					//Right Column
-							.addGroup(layout.createSequentialGroup()
-								.addComponent(itemSettingsLabel)
-							.addGroup(layout.createParallelGroup()
-									.addComponent(itemTypeLabel)
-									.addComponent(itemTypeComboBox))
-							.addComponent(timeSettingsLabel)
-							.addGroup(layout.createParallelGroup()
-									.addComponent(intervalLabel)
-									.addComponent(intervalTextField))
-							.addGroup(layout.createParallelGroup()
-									.addComponent(windowLabel)
-									.addComponent(windowTextField))
-							.addGroup(layout.createParallelGroup()
-									.addComponent(timeUnitLabel)
-									.addComponent(timeUnitComboBox))
-							.addGroup(layout.createParallelGroup()
-									.addComponent(dayLabel)
-									.addComponent(dayTextField))
-							.addGroup(layout.createParallelGroup()
-									.addComponent(addButton)
-									.addComponent(graphButton)))
-							.addComponent(itemList)) //list of analyzers
-					.addComponent(logTextArea)); //the log
+						.addGroup(layout.createParallelGroup()
+						//Right Column
+								.addGroup(layout.createSequentialGroup()
+									.addComponent(itemSettingsLabel)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(itemTypeLabel)
+										.addComponent(itemTypeComboBox))
+								.addComponent(timeSettingsLabel)
+								.addGroup(layout.createParallelGroup()
+										.addComponent(intervalLabel)
+										.addComponent(intervalTextField))
+								.addGroup(layout.createParallelGroup()
+										.addComponent(windowLabel)
+										.addComponent(windowTextField))
+								.addGroup(layout.createParallelGroup()
+										.addComponent(timeUnitLabel)
+										.addComponent(timeUnitComboBox))
+								.addGroup(layout.createParallelGroup()
+										.addComponent(dayLabel)
+										.addComponent(dayTextField))
+								.addGroup(layout.createParallelGroup()
+										.addComponent(addButton)
+										.addComponent(graphButton)
+										.addComponent(clearButton)))
+								.addComponent(itemList)) //list of analyzers
+						.addComponent(logTextArea));//the log
 	}
 	
 	public void initListeners() {
@@ -246,6 +247,14 @@ public class AnalyzerWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				itemList.updateAnalyzers();
 				dataviewer.updatePlot(itemList.getPlotData());
+			}
+		});
+		
+		clearButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dataviewer.resetPlot();
+				itemList.clearAnalyzers();
 			}
 		});
 		
@@ -297,8 +306,11 @@ public class AnalyzerWindow extends JFrame {
 	}
 	
 	public static void main(String[] args) throws SQLException, IOException, InterruptedException {
-		@SuppressWarnings("unused")
+		
 		AnalyzerWindow window = new AnalyzerWindow();
+		
+//		window.initJFX();
+		window.initWindow();
 		
 		//URL Here:
 		//http://localhost:8090/view/analyzer

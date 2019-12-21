@@ -55,6 +55,7 @@ public class AnalyzerPanel extends JScrollPane {
 	}
 	
 	public void updateAnalyzers() {
+		plotData = new PlotData();
 		for(Analyzer analyzer : analyzers) {
 			analyzer.updateTrace();
 			plotData.addTrace(analyzer.getTrace());
@@ -67,6 +68,12 @@ public class AnalyzerPanel extends JScrollPane {
 			analyzer.appendTrace(plotData);
 //			maData.addTrace(analyzer.getTrace());
 		}
+	}
+	
+	public void clearAnalyzers() {
+		analyzers.clear();
+		plotData = new PlotData();
+		((DefaultTableModel) table.getModel()).setRowCount(0);
 	}
 	
 	public PlotData getPlotData() {
