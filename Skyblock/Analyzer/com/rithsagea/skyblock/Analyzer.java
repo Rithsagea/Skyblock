@@ -143,12 +143,12 @@ public class Analyzer {
 		
 		List<Datapoint> data = new ArrayList<Datapoint>();
 		
-		Timestamp now = new Timestamp(calendar.getTimeInMillis());
+		Timestamp now = new Timestamp(calendar.getTimeInMillis() - (5 * 60 * 60 * 1000));
 		
 		for(Datapoint point : pd) {
-			if(point.time.after(now)) {
+//			if(point.time.after(now)) {
 				data.add(point);
-			}
+//			}
 		}
 		
 		int len = data.size();

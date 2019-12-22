@@ -1,10 +1,30 @@
 package com.rithsagea.skyblock.api.datatypes.items;
 
 public enum ItemType {
+	//Slayer
+	//Zombie
+	REVENANT_FLESH,
+	REVENANT_VISCERA,
+	
+	REVIVED_HEART,
+	CRYSTALLIZED_HEART,
+	
+	REVENANT_CHESTPLATE,
+	REVENANT_LEGGINGS,
+	REVENANT_BOOTS,
+	
+	REVENANT_SWORD,
+	REAPER_SWORD,
+	
 	//Overworld
 	//Swords
 	LEAPING_SWORD,
 	
+	//Armor
+	ZOMBIE_HEART,
+	ZOMBIE_CHESTPLATE,
+	ZOMBIE_LEGGINGS,
+	ZOMBIE_BOOTS,
 	
 	//End
 	//Weapons
