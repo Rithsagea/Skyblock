@@ -13,6 +13,7 @@
 	</classpathentry>
 	<classpathentry kind="src" path="Downloader"/>
 	<classpathentry kind="src" path="Analyzer"/>
+	<classpathentry kind="src" path="Uploader"/>
 	<classpathentry kind="lib" path="libs/tbnbt-0.1.4.jar"/>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
 		<attributes>
