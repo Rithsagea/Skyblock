@@ -245,7 +245,8 @@ public class AnalyzerWindow extends JFrame {
 		graphButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				itemList.updateAnalyzers();
+//				itemList.updateAnalyzers();
+				itemList.calculateTraces();
 				dataviewer.updatePlot(itemList.getPlotData());
 			}
 		});

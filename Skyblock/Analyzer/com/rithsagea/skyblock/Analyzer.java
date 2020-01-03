@@ -184,16 +184,21 @@ public class Analyzer {
 		return trace;
 	}
 	
+	public TimeSeriesTrace<Object> getMovingAverageTrace() {
+		pd = ma;
+		return createTrace("MA_" + itemType.toString());
+	}
+	
 	public void appendTrace(PlotData plot) {
 		pd = ma;
 		TimeSeriesTrace<Object> ma_trace = createTrace("MA_" + itemType.toString());
 		plot.addTrace(ma_trace);
 		
 //		double[] pars = DataUtil.randWalkOpt(ma, 100000, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
-		double[] pars = DataUtil.geneticsOpt(ma, 10000, 100, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
-		
-		pd = DataUtil.generateForecast(ma, pars[0], pars[1], pars[2], TimeUnit.MILLISECONDS.convert(interval, unit), periods, daysAhead, true);
-		TimeSeriesTrace<Object> forecast_trace = createTrace("F_" + itemType.toString());
-		plot.addTrace(forecast_trace);
+//		double[] pars = DataUtil.geneticsOpt(ma, 10000, 100, TimeUnit.MILLISECONDS.convert(interval, unit), periods, 2);
+//		
+//		pd = DataUtil.generateForecast(ma, pars[0], pars[1], pars[2], TimeUnit.MILLISECONDS.convert(interval, unit), periods, daysAhead, true);
+//		TimeSeriesTrace<Object> forecast_trace = createTrace("F_" + itemType.toString());
+//		plot.addTrace(forecast_trace);
 	}
 }
